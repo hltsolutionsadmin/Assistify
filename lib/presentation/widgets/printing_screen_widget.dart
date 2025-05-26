@@ -2,6 +2,9 @@ import 'package:assistify/core/constants/colors.dart';
 import 'package:assistify/core/constants/sizes.dart';
 import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_cubit.dart';
 import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_state.dart';
+import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_cubit.dart';
+import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_state.dart';
+import 'package:assistify/presentation/widgets/bluetooth_print_widet.dart';
 import 'package:assistify/presentation/widgets/generate_pdf_widget.dart';
 import 'package:assistify/presentation/widgets/helper_widgets.dart/button_widget.dart';
 import 'package:assistify/presentation/widgets/helper_widgets.dart/printing_screen_helper_widget.dart';
@@ -21,15 +24,33 @@ class PrintingCard extends StatefulWidget {
   State<PrintingCard> createState() => _PrintingCardState();
 }
 
-
 class _PrintingCardState extends State<PrintingCard> {
- void initState() {
+  void initState() {
     super.initState();
-    context.read<AllBillsCubit>().spareBills(context:  context, jobId:  widget.data.id);
+    context.read<AllBillsCubit>().spareBills(
+      context: context,
+      jobId: widget.data.id,
+    );
+    userBanner();
+  
   }
+  String bannerImage = '';
 
+userBanner() async {
+  final userProfileCubit = context.read<UserProfileCubit>();
+  await userProfileCubit.userProfile(
+    context,
+    widget.data.companyId,
+  );
+  final profile = userProfileCubit.state;
+  if(profile is UserProfileLoaded) {
+    bannerImage = profile.userProfileModel.data?.bannerImage ?? '';
+  }
+}
+
+  dynamic spare_Bills = [];
   Future<void> _handlePrintAction() async {
-    final pdf = await generatePdf(widget.title, widget.data);
+    final pdf = await generatePdf(widget.title, widget.data, spare_Bills, bannerImage, context);
     final bytes = await pdf.save();
 
     showModalBottomSheet(
@@ -99,14 +120,21 @@ class _PrintingCardState extends State<PrintingCard> {
             children: [
               SizedBox(height: getHeight(context) * 0.01),
               buildButton(
-                text: "Print/Share",
-                icon: Icons.print,
+                text: "Share",
+                icon: Icons.share,
                 handleAction: _handlePrintAction,
               ),
               buildButton(
                 text: "Print",
                 icon: Icons.print,
-                handleAction: (){},
+                handleAction: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return PrintScreen(data: widget.data);
+                    },
+                  );
+                },
               ),
               SizedBox(height: getHeight(context) * 0.02),
               Center(
@@ -174,202 +202,224 @@ class _PrintingCardState extends State<PrintingCard> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-Container(
-  color: AppColor.blue,
-  padding: const EdgeInsets.all(12),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '#',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'DESCRIPTION',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'PRICE',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'QUANTITY',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'TOTAL',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            height: 1,
-            color: Colors.white.withOpacity(0.5),
-            margin: EdgeInsets.symmetric(vertical: 8),
-          ),
-          BlocBuilder<AllBillsCubit, AllBillsState>(
-            builder: (context, state) {
-              if (state is SpareBillsLoaded && state.billSparesModel.data != null) {
-                final spareBills = state.billSparesModel.data;
-                return Column(
-                  children: List.generate(
-                    spareBills?.length ?? 0,
-                    (index) => Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${index + 1}',
-                              style: TextStyle(
-                                color: AppColor.white,
-                                fontWeight: FontWeight.w400,
+                    Container(
+                      color: AppColor.blue,
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '#',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    'DESCRIPTION',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    'PRICE',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    'QUANTITY',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    'TOTAL',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            Text(
-                              spareBills?[index].product ?? '',
-                              style: TextStyle(
-                                color: AppColor.white,
-                                fontWeight: FontWeight.w400,
+                              Container(
+                                height: 1,
+                                color: Colors.white.withOpacity(0.5),
+                                margin: EdgeInsets.symmetric(vertical: 8),
                               ),
-                            ),
-                            Text(
-                              spareBills?[index].price.toString() ?? '',
-                              style: TextStyle(
-                                color: AppColor.white,
-                                fontWeight: FontWeight.w400,
+                              BlocBuilder<AllBillsCubit, AllBillsState>(
+                                builder: (context, state) {
+                                  if (state is SpareBillsLoaded &&
+                                      state.billSparesModel.data != null) {
+                                    final spareBills =
+                                        state.billSparesModel.data;
+                                    spare_Bills = state.billSparesModel.data;
+                                    return Column(
+                                      children: List.generate(
+                                        spareBills?.length ?? 0,
+                                        (index) => Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  '${index + 1}',
+                                                  style: TextStyle(
+                                                    color: AppColor.white,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  spareBills?[index].product ??
+                                                      '',
+                                                  style: TextStyle(
+                                                    color: AppColor.white,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  spareBills?[index].price
+                                                          .toString() ??
+                                                      '',
+                                                  style: TextStyle(
+                                                    color: AppColor.white,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  spareBills?[index].quantity
+                                                          .toString() ??
+                                                      '',
+                                                  style: TextStyle(
+                                                    color: AppColor.white,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  ((spareBills?[index].price ??
+                                                              0) *
+                                                          (spareBills?[index]
+                                                                  .quantity ??
+                                                              0))
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                    color: AppColor.white,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Container(
+                                              height: 1,
+                                              color: Colors.white.withOpacity(
+                                                0.5,
+                                              ),
+                                              margin: EdgeInsets.symmetric(
+                                                vertical: 8,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return const SizedBox();
+                                },
                               ),
-                            ),
-                            Text(
-                              spareBills?[index].quantity.toString() ?? '',
-                              style: TextStyle(
-                                color: AppColor.white,
-                                fontWeight: FontWeight.w400,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'PAID AMOUNT:',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    widget.data.paidAmount?.toString() ?? '0',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            Text(
-                              ((spareBills?[index].price ?? 0) * (spareBills?[index].quantity ?? 0)).toString(),
-                              style: TextStyle(
-                                color: AppColor.white,
-                                fontWeight: FontWeight.w400,
+                              Container(
+                                height: 1,
+                                color: Colors.white.withOpacity(0.5),
+                                margin: EdgeInsets.symmetric(vertical: 8),
                               ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          height: 1,
-                          color: Colors.white.withOpacity(0.5),
-                          margin: EdgeInsets.symmetric(vertical: 8),
-                        ),
-                      ],
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'BALANCE:',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    ((widget.data.totalAmount ?? 0) -
+                                            (widget.data.paidAmount ?? 0))
+                                        .toString(),
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                height: 1,
+                                color: Colors.white.withOpacity(0.5),
+                                margin: EdgeInsets.symmetric(vertical: 8),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'GRAND TOTAL:',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    widget.data.totalAmount?.toString() ?? '0',
+                                    style: TextStyle(
+                                      color: AppColor.white,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                height: 1,
+                                color: Colors.white.withOpacity(0.5),
+                                margin: EdgeInsets.symmetric(vertical: 8),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }
-              return const SizedBox();
-            },
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                'PAID AMOUNT:',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                widget.data.paidAmount?.toString() ?? '0',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            height: 1,
-            color: Colors.white.withOpacity(0.5),
-            margin: EdgeInsets.symmetric(vertical: 8),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                'BALANCE:',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                ((widget.data.totalAmount ?? 0) - (widget.data.paidAmount ?? 0)).toString(),
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            height: 1,
-            color: Colors.white.withOpacity(0.5),
-            margin: EdgeInsets.symmetric(vertical: 8),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                'GRAND TOTAL:',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                widget.data.totalAmount?.toString() ?? '0',
-                style: TextStyle(
-                  color: AppColor.white,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            height: 1,
-            color: Colors.white.withOpacity(0.5),
-            margin: EdgeInsets.symmetric(vertical: 8),
-          ),
-        ],
-      ),
-    ],
-  ),
-),
 
                     Text('Thank You!', style: TextStyle(fontSize: 16)),
                     SizedBox(height: getHeight(context) * 0.02),

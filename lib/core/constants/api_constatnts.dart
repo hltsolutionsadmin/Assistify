@@ -14,5 +14,6 @@ const addExpences = '/api/Expense/add';
 const editExpences = '/api/Expense/update';
 const deleteExpences = '/api/Expense/delete';
 const saveBill = '/api/Bill/SaveBill';
+const userProfile = '/api/Company/';
 
 

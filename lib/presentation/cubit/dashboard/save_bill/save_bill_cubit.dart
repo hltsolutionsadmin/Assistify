@@ -14,10 +14,8 @@ class SaveBillCubit extends Cubit<SaveBillState> {
   SaveBillCubit({required this.useCase, required this.networkService})
     : super(SaveBillInitial());
 
-  Future<void> save_bill(
-    BuildContext context,
-  dynamic body,
-  ) async {
+  Future<void> save_bill(BuildContext context, dynamic body, String companyName) async {
+    print(body);
     bool isConnected = await networkService.hasInternetConnection();
     print(isConnected);
     if (!isConnected) {
@@ -35,37 +33,38 @@ class SaveBillCubit extends Cubit<SaveBillState> {
       print(saveBillEntity);
       if (saveBillEntity.status == 'SUCCESS') {
         Navigator.pop(context);
-        _launchWhatsApp('9705047662', context);
+        _launchWhatsApp(context, body, companyName);
         emit(SaveBillLoaded(saveBillEntity));
       } else {
         CustomSnackbars.showErrorSnack(
-        context: context,
-        title: 'Alert',
-        message: 'some thing went wrong',
-      );
+          context: context,
+          title: 'Alert',
+          message: 'some thing went wrong',
+        );
       }
     } catch (e) {
       print('error in allbills: $e');
       emit(SaveBillError('Failed to load save bill data: ${e.toString()}'));
     }
   }
-  
-Future<void> _launchWhatsApp(String phone, context) async {
+
+  Future<void> _launchWhatsApp(context, body, companyName) async {
+    String phone = body['phoneNumber'] ?? '';
     String sanitizedPhone = phone.replaceAll(RegExp(r'[^0-9+]'), '');
     if (sanitizedPhone.startsWith('+')) {
       sanitizedPhone = sanitizedPhone.substring(1);
     }
 
     String message = ''' 
-Hello *Anil*
+Hello *${body['customerName']}*
 Please find the requested details:
-Product: *${'productName'}*(${'modelNumber'}, ${'serialNumber'})
+Product: *${body['productName']}*(${body['modelNumber']}, ${body['serialNumber']})
 Order/Complaint: *${'complaint'}*
 Job/OrderId: *${'jobId'}*
-Status: *${'status'}*
+Status: *${body['status']}*
 
 Thanks & Regards
-*JRServices*
+*${companyName}*
 *$phone*
     ''';
 
@@ -82,5 +81,4 @@ Thanks & Regards
       ).showSnackBar(const SnackBar(content: Text('WhatsApp not available')));
     }
   }
-
 }
