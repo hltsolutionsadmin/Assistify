@@ -15,6 +15,8 @@ class AllBillsCubit extends Cubit<AllBillsState> {
   AllBillsCubit({required this.useCase, required this.networkService})
     : super(AllBillsInitial());
 
+    
+
   Future<void> all_bills(
     BuildContext context,
   dynamic body,
@@ -43,6 +45,7 @@ class AllBillsCubit extends Cubit<AllBillsState> {
       emit(AllBillsError('Failed to load all BillsEntity data: ${e.toString()}'));
     }
   }
+  
   
   Future<void> searchBills({
     required BuildContext context,

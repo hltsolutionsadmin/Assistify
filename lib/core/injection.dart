@@ -6,6 +6,7 @@ import 'package:assistify/data/datasource/dashboard/all_bills_datasource.dart';
 import 'package:assistify/data/datasource/dashboard/all_expences_datasource.dart';
 import 'package:assistify/data/datasource/dashboard/inventory_products_datasource.dart';
 import 'package:assistify/data/datasource/dashboard/save_bill_datasource.dart';
+import 'package:assistify/data/datasource/dashboard/user_profile_datasource.dart';
 import 'package:assistify/data/datasource/forgot_password/forgot_password_datasource.dart';
 import 'package:assistify/data/datasource/login/login_datasource.dart';
 import 'package:assistify/data/repoimpl/add_expences/add_expences_repo_impl.dart';
@@ -14,6 +15,7 @@ import 'package:assistify/data/repoimpl/dashboard/all_bills_repo_impl.dart';
 import 'package:assistify/data/repoimpl/dashboard/all_expences_repo_impl.dart';
 import 'package:assistify/data/repoimpl/dashboard/inventory_products_repo_impl.dart';
 import 'package:assistify/data/repoimpl/dashboard/save_bill_repo_impl.dart';
+import 'package:assistify/data/repoimpl/dashboard/user_profile_repo_impl.dart';
 import 'package:assistify/data/repoimpl/forgot_password/forgot_password_repo_impl.dart';
 import 'package:assistify/data/repoimpl/login/login_repo_impl.dart';
 import 'package:assistify/domain/repo/add_expences/add_expences_repository.dart';
@@ -22,6 +24,7 @@ import 'package:assistify/domain/repo/dashboard/all_bills_repository.dart';
 import 'package:assistify/domain/repo/dashboard/all_expences_repository.dart';
 import 'package:assistify/domain/repo/dashboard/inventory_products_repository.dart';
 import 'package:assistify/domain/repo/dashboard/save_bill_repository.dart';
+import 'package:assistify/domain/repo/dashboard/user_profile_repository.dart';
 import 'package:assistify/domain/repo/forgot_password/forgot_password_repositort.dart';
 import 'package:assistify/domain/repo/login/login_repository.dart';
 import 'package:assistify/domain/usecase/add_expences/add_expences_useCase.dart';
@@ -30,6 +33,7 @@ import 'package:assistify/domain/usecase/dashboard/all_bills_usecase.dart';
 import 'package:assistify/domain/usecase/dashboard/all_expences_usecase.dart';
 import 'package:assistify/domain/usecase/dashboard/inventory_products_usecase.dart';
 import 'package:assistify/domain/usecase/dashboard/save_bill_usecase.dart';
+import 'package:assistify/domain/usecase/dashboard/user_profile_usecase.dart';
 import 'package:assistify/domain/usecase/forgot_password/forgot_password_usecase.dart';
 import 'package:assistify/domain/usecase/login/login_usecase.dart';
 import 'package:assistify/presentation/cubit/add_expences/add_expences_cubit.dart';
@@ -38,6 +42,7 @@ import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_cubit
 import 'package:assistify/presentation/cubit/dashboard/all_expences/all_expences_cubit.dart';
 import 'package:assistify/presentation/cubit/dashboard/inventory_products/inventory_produts_cubit.dart';
 import 'package:assistify/presentation/cubit/dashboard/save_bill/save_bill_cubit.dart';
+import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_cubit.dart';
 import 'package:assistify/presentation/cubit/forgot_password/forgot_password_cubit.dart';
 import 'package:assistify/presentation/cubit/login/logIn_cubit.dart';
 import 'package:dio/dio.dart';
@@ -163,4 +168,17 @@ void init(){
     () => AddExpencesUsecase(repository: sl<AddExpencesRepository>()),
   );
   sl.registerFactory(() => AddExpencesCubit(useCase: sl<AddExpencesUsecase>(), networkService: NetworkService()));
+
+  //USER PROFILE
+
+  sl.registerLazySingleton<UserProfileDatasource>(
+    () => UserProfileDataSourceImpl(client: sl<DioClient>().dio),
+  );
+  sl.registerLazySingleton<UserProfileRepository>(
+    () => UserProfileRepoImpl(remoteDataSource: sl<UserProfileDatasource>()),
+  );
+  sl.registerLazySingleton(
+    () => UserProfileUsecase(repository: sl<UserProfileRepository>()),
+  );
+  sl.registerFactory(() => UserProfileCubit(useCase: sl<UserProfileUsecase>(), networkService: NetworkService()));
 }

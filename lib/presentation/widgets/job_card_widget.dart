@@ -1,3 +1,4 @@
+import 'package:assistify/core/constants/colors.dart';
 import 'package:assistify/presentation/screen/addjob/add_job_form_screen.dart';
 import 'package:assistify/presentation/widgets/contact_popup_widget.dart';
 import 'package:assistify/presentation/widgets/file_popup_widget.dart';
@@ -8,7 +9,8 @@ import 'package:intl/intl.dart';
 class JobCard extends StatefulWidget {
   final dynamic jobData;
   final Function? fetchData;
-  JobCard({super.key, required this.jobData, this.fetchData});
+  String? companyName;
+  JobCard({super.key, required this.jobData, this.fetchData, this.companyName});
 
   @override
   State<JobCard> createState() => _JobCardState();
@@ -31,8 +33,9 @@ class _JobCardState extends State<JobCard> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                const CircleAvatar(
+                 CircleAvatar(
                   radius: 24,
+                  backgroundColor: AppColor.gray,
                   child: Icon(Icons.person, size: 30),
                 ),
                 const SizedBox(width: 10),
@@ -58,17 +61,21 @@ class _JobCardState extends State<JobCard> {
                 Column(
                   children: [
                     InkWell(
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => AddJobFormScreen(
-                                jobData:widget.jobData
-                              ),
-                              
-                            ),
-                          ),
-                      child: Icon(Icons.edit, size: 20),
+                      onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AddJobFormScreen(
+                        jobData: widget.jobData,
+                        title: 'Edit Job',
+                        companyName: widget.companyName
+                      ),
+                    ),
+                  ).then((_) {
+                    if (widget.fetchData != null) widget.fetchData!();
+                  });
+                      },
+                      child: Icon(Icons.edit, size: 24),
                     ),
                     SizedBox(height: 12),
                     InkWell(
@@ -80,12 +87,12 @@ class _JobCardState extends State<JobCard> {
                               widget.fetchData,
                             ),
                           },
-                      child: Icon(Icons.description, size: 20),
+                      child: Icon(Icons.description, size: 24),
                     ),
                     SizedBox(height: 12),
                     InkWell(
                       onTap: () => {},
-                      child: Icon(Icons.upload, size: 20),
+                      child: Icon(Icons.upload, size: 24),
                     ),
                   ],
                 ),

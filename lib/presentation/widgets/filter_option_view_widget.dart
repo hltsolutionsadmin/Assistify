@@ -5,6 +5,7 @@ import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_cubit
 import 'package:assistify/presentation/widgets/dash_board_helper_widget.dart';
 import 'package:assistify/presentation/widgets/helper_widgets.dart/button_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FilterOptionsView extends StatefulWidget {
@@ -52,6 +53,10 @@ class _FilterOptionsViewState extends State<FilterOptionsView> {
                 'Phone Number',
                 errorText: null,
                 onChanged: (value) => {},
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
               ),
               SizedBox(height: 12),
               BuildDropdown(selectedStatus, statusList, (value) {

@@ -12,7 +12,7 @@ class SpareBox extends StatefulWidget {
   final ValueChanged<String> onPriceChanged;
   final VoidCallback onDelete;
   final VoidCallback onSelectProductTap;
-  final String? selectedProduct; 
+  final String? selectedProduct;
   final bool showOtherItemsFields;
 
   const SpareBox({
@@ -25,7 +25,7 @@ class SpareBox extends StatefulWidget {
     required this.onPriceChanged,
     required this.onDelete,
     required this.onSelectProductTap,
-    this.selectedProduct, 
+    this.selectedProduct,
     required this.showOtherItemsFields,
   }) : super(key: key);
 
@@ -42,17 +42,23 @@ class _SpareBoxState extends State<SpareBox> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.spareBox['name'] ?? '');
-    _descriptionController = TextEditingController(text: widget.spareBox['description'] ?? '');
+    _nameController = TextEditingController(
+      text: widget.spareBox['name'] ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.spareBox['description'] ?? '',
+    );
     _quantityController = TextEditingController(
-      text: widget.spareBox['quantity'] == 0
-          ? ''
-          : widget.spareBox['quantity'].toString(),
+      text:
+          widget.spareBox['quantity'] == 0
+              ? ''
+              : widget.spareBox['quantity'].toString(),
     );
     _priceController = TextEditingController(
-      text: widget.spareBox['price'] == 0.0
-          ? ''
-          : widget.spareBox['price'].toString(),
+      text:
+          widget.spareBox['price'] == 0.0
+              ? ''
+              : widget.spareBox['price'].toString(),
     );
   }
 
@@ -66,14 +72,20 @@ class _SpareBoxState extends State<SpareBox> {
       _descriptionController.text = widget.spareBox['description'] ?? '';
     }
     if (widget.spareBox['quantity'] != oldWidget.spareBox['quantity']) {
-      final newQuantity = widget.spareBox['quantity'] == 0 ? '' : widget.spareBox['quantity'].toString();
-      if (_quantityController.text != newQuantity) { 
+      final newQuantity =
+          widget.spareBox['quantity'] == 0
+              ? ''
+              : widget.spareBox['quantity'].toString();
+      if (_quantityController.text != newQuantity) {
         _quantityController.text = newQuantity;
       }
     }
     if (widget.spareBox['price'] != oldWidget.spareBox['price']) {
-      final newPrice = widget.spareBox['price'] == 0.0 ? '' : widget.spareBox['price'].toString();
-      if (_priceController.text != newPrice) { 
+      final newPrice =
+          widget.spareBox['price'] == 0.0
+              ? ''
+              : widget.spareBox['price'].toString();
+      if (_priceController.text != newPrice) {
         _priceController.text = newPrice;
       }
     }
@@ -103,18 +115,15 @@ class _SpareBoxState extends State<SpareBox> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   IconButton(
-                    icon: Icon(
-                      Icons.cancel,
-                      color: AppColor.red,
-                    ),
+                    icon: Icon(Icons.cancel, color: AppColor.red),
                     onPressed: widget.onDelete,
                   ),
                 ],
               ),
               CustomDropdownField(
                 hintText: 'Select Product',
-                selectedValue: widget.selectedProduct, 
-                onTap: widget.onSelectProductTap, 
+                selectedValue: widget.selectedProduct,
+                onTap: widget.onSelectProductTap,
               ),
               if (widget.showOtherItemsFields) ...[
                 SizedBox(height: 12),
@@ -152,12 +161,26 @@ class _SpareBoxState extends State<SpareBox> {
                       controller: _quantityController,
                       decoration: InputDecoration(
                         labelText: 'Quantity',
-                        border: OutlineInputBorder(),
+                        labelStyle: TextStyle(
+                          color: AppColor.black,
+                          fontSize: 14,
+                        ),
+                        focusColor: AppColor.blue,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: AppColor.gray),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: AppColor.gray),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppColor.blue,
+                            width: 2,
+                          ),
+                        ),
                       ),
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onChanged: widget.onQuantityChanged,
                     ),
                   ),
@@ -167,11 +190,29 @@ class _SpareBoxState extends State<SpareBox> {
                       controller: _priceController,
                       decoration: InputDecoration(
                         labelText: 'Price',
-                        border: OutlineInputBorder(),
+                        labelStyle: TextStyle(
+                          color: AppColor.black,
+                          fontSize: 14,
+                        ),
+                        focusColor: AppColor.blue,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: AppColor.gray),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: AppColor.gray),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppColor.blue,
+                            width: 2,
+                          ),
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}'),
+                        ),
                       ],
                       onChanged: widget.onPriceChanged,
                     ),
@@ -184,10 +225,7 @@ class _SpareBoxState extends State<SpareBox> {
                 children: [
                   Text(
                     'Amount: ₹${((widget.spareBox['quantity'] ?? 0) * (widget.spareBox['price'] ?? 0.0)).toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ],
               ),

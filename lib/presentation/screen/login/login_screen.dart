@@ -1,5 +1,4 @@
 import 'package:assistify/components/custome_text_field.dart';
-import 'package:assistify/components/text_input.dart';
 import 'package:assistify/core/constants/colors.dart';
 import 'package:assistify/core/constants/imgs_const.dart';
 import 'package:assistify/core/constants/sizes.dart';
