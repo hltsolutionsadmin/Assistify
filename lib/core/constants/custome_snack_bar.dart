@@ -12,7 +12,7 @@ class CustomSnackbars {
       title: title,
       message: message,
       backgroundColor: AppColor.green,
-      textColor: AppColor.black,
+      textColor: AppColor.white,
     );
   }
 
@@ -58,7 +58,7 @@ class CustomSnackbars {
         left: 10,
         right: 10,
         child: Material(
-          color: AppColor.black,
+          color: Colors.transparent,
           child: FadeTransition(
             opacity: getAnimation(context) ?? const AlwaysStoppedAnimation(1.0),
             child: SlideTransition(
@@ -75,10 +75,11 @@ class CustomSnackbars {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   decoration: BoxDecoration(
+                  
                     gradient: LinearGradient(
                       colors: [
                         backgroundColor.withOpacity(1),
-                        backgroundColor.withOpacity(0.5),
+                        backgroundColor.withOpacity(1),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -124,7 +125,7 @@ class CustomSnackbars {
 
     overlay.insert(overlayEntry);
 
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 2), () {
       overlayEntry.remove();
     });
   }

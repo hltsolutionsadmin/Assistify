@@ -8,6 +8,7 @@ import 'package:assistify/presentation/screen/add_expences/add_expences_screen.d
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ExpencesScreen extends StatefulWidget {
@@ -138,6 +139,8 @@ class ExpenseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final DateFormat _dateFormat = DateFormat('dd MMM yyyy');
+
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 12),
@@ -226,7 +229,7 @@ class ExpenseCard extends StatelessWidget {
                           text: 'Created Date: ',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        TextSpan(text: expense.expenseDate ?? ''),
+                        TextSpan(text: expense.expenseDate != null ? _dateFormat.format(DateTime.parse(expense.expenseDate.toString())) ?? '' : ''),
                       ],
                     ),
                   ),

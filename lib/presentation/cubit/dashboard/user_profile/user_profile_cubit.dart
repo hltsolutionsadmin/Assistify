@@ -42,4 +42,52 @@ class UserProfileCubit extends Cubit<UserProfileState> {
       );
     }
   }
+
+  Future<void> editProfile(BuildContext context, String companyId, dynamic body) async {
+  bool isConnected = await networkService.hasInternetConnection();
+  print(isConnected);
+  
+  if (!isConnected) {
+    print("No Internet Connection");
+    CustomSnackbars.showErrorSnack(
+      context: context,
+      title: 'Alert',
+      message: 'Please check Internet Connection',
+    );
+    return;
+  }
+
+  try {
+    emit(EditProfileLoading());
+    final editProfileEntity = await useCase.edit_Profile(companyId, body);
+    print(editProfileEntity);
+    emit(EditProfileLoaded(editProfileEntity));
+    if (editProfileEntity.status == 'SUCCESS') {
+      CustomSnackbars.showSuccessSnack(
+        context: context,
+        title: 'Success',
+        message: 'Profile updated successfully',
+      );
+    } else {
+      CustomSnackbars.showErrorSnack(
+        context: context,
+        title: 'Failed',
+        message: editProfileEntity.message ?? 'Profile update failed',
+      );
+    }
+  } catch (e) {
+    print('error in editProfile: $e');
+    emit(
+      EditProfileError(
+        'Failed to load editProfile data: ${e.toString()}',
+      ),
+    );
+    CustomSnackbars.showErrorSnack(
+      context: context,
+      title: 'Error',
+      message: 'Something went wrong. Please try again.',
+    );
+  }
+}
+
 }

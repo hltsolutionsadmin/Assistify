@@ -1,6 +1,10 @@
 import 'package:assistify/components/custome_text_field.dart';
 import 'package:assistify/core/constants/colors.dart';
+import 'package:assistify/core/constants/custome_snack_bar.dart';
 import 'package:assistify/core/constants/sizes.dart';
+import 'package:assistify/data/model/add_product/get_products_list_model.dart';
+import 'package:assistify/presentation/cubit/add_products/add_products_cubit.dart';
+import 'package:assistify/presentation/cubit/add_products/add_products_state.dart';
 import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_cubit.dart';
 import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_state.dart';
 import 'package:assistify/presentation/cubit/dashboard/save_bill/save_bill_cubit.dart';
@@ -15,116 +19,56 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AddJobFormScreen extends StatefulWidget {
   final dynamic jobData;
-  String? title;
-  String? companyName;
-  AddJobFormScreen({Key? key, this.jobData, this.title, this.companyName})
-    : super(key: key);
+  final String? title;
+  final String? companyName;
+  const AddJobFormScreen({Key? key, this.jobData, this.title, this.companyName}) : super(key: key);
+
   @override
-  _AddJobFormScreenState createState() => _AddJobFormScreenState();
+  State<AddJobFormScreen> createState() => _AddJobFormScreenState();
 }
 
 class _AddJobFormScreenState extends State<AddJobFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  String? _userId;
-  String? _companyId;
-  bool isLoading = false;
+  String? _userId, _companyId, _statusSelected, _paymentMode = '';
+  bool isLoading = false, buttonError = true;
 
-  final TextEditingController _customerNameController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _alternatePhoneNumberController =
-      TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _statusDescriptionController =
-      TextEditingController();
-  final TextEditingController _productOrderNameController =
-      TextEditingController();
-  final TextEditingController _modelNumberController = TextEditingController();
-  final TextEditingController _serialNumberController = TextEditingController();
-  final TextEditingController _orderComplaintController =
-      TextEditingController();
-  final TextEditingController _otherAccessoriesController =
-      TextEditingController();
-  final TextEditingController _paidAmountController = TextEditingController();
-  final TextEditingController _balanceAmountController =
-      TextEditingController();
+  final _customerNameController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
+  final _alternatePhoneNumberController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _statusDescriptionController = TextEditingController();
+  final _productOrderNameController = TextEditingController();
+  final _modelNumberController = TextEditingController();
+  final _serialNumberController = TextEditingController();
+  final _orderComplaintController = TextEditingController();
+  final _otherAccessoriesController = TextEditingController();
+  final _paidAmountController = TextEditingController();
+  final _balanceAmountController = TextEditingController();
 
-  bool _nameError = false;
-  bool _phoneError = false;
-  bool _alternatePhoneError = false;
-  bool _addressError = false;
-  bool _statusDescriptionError = false;
-  bool _productOrderNameError = false;
-  bool _modelNumberError = false;
-  bool _serialNumberError = false;
-  bool _orderComplaintError = false;
-  bool _otherAccessoriesError = false;
-  bool _paidAmountError = false;
-  bool _balanceAmountError = false;
-  bool _sparesError = false;
-  bool _statusError = false;
+  bool _nameError = false, _phoneError = false, _alternatePhoneError = false, _addressError = false,
+      _statusDescriptionError = false, _productOrderNameError = false, _modelNumberError = false,
+      _serialNumberError = false, _orderComplaintError = false, _otherAccessoriesError = false,
+      _paidAmountError = false, _balanceAmountError = false, _sparesError = false, _statusError = false;
 
-  String? _statusSelected;
-  String _paymentMode = '';
   List<Map<String, dynamic>> _spareBoxes = [];
+  List<Data> _selectProducts = [];
 
-  final List<String> _statuses = [
-    'Received',
-    'Assigned',
-    'In Progress',
-    'Estimated',
-    'Pending',
-    'Delivered',
-    'Completed',
-    'Paid',
-    "Return",
+  static const _statuses = [
+    'Received', 'Assigned', 'In Progress', 'Estimated', 'Pending', 'Delivered', 'Completed', 'Paid', "Return"
   ];
-  final List<String> _selectProducts = ['ink bottle', 'laptop', 'Other Items'];
-  final List<String> _payments = ['card', 'COD', 'Bank Transfer', 'Upi'];
+  static const _payments = ['card', 'Cash', 'Bank Transfer', 'Upi'];
 
   @override
   void initState() {
     super.initState();
     _fetchData();
-    _updateBalanceAmount();
     _paidAmountController.addListener(_updateBalanceAmount);
     if (widget.jobData != null) {
-      context.read<AllBillsCubit>().spareBills(
-        context: context,
-        jobId: widget.jobData.id,
-      );
-      final spares = context.read<AllBillsCubit>();
-      final state = spares.state;
-      if (state is SpareBillsLoaded) {
-        _spareBoxes =
-            (state.billSparesModel.data ?? []).cast<Map<String, dynamic>>();
-        print(_spareBoxes);
-      }
+      context.read<AllBillsCubit>().spareBills(context: context, jobId: widget.jobData.id);
     }
-    edit_details();
-  }
-
-  edit_details() async {
-    if (widget.jobData != null) {
-      _customerNameController.text = widget.jobData.customerName ?? '';
-      _phoneNumberController.text = widget.jobData.phoneNumber ?? '';
-      _alternatePhoneNumberController.text =
-          widget.jobData.alternatePhoneNumber ?? '';
-      _addressController.text = widget.jobData.address ?? '';
-      _statusDescriptionController.text =
-          widget.jobData.statusDescription ?? '';
-      _productOrderNameController.text = widget.jobData.productName ?? '';
-      _modelNumberController.text = widget.jobData.modelNumber ?? '';
-      _serialNumberController.text = widget.jobData.serialNumber ?? '';
-      _orderComplaintController.text = widget.jobData.complaint ?? '';
-      _otherAccessoriesController.text = widget.jobData.otherAccessories ?? '';
-      _paidAmountController.text = widget.jobData.paidAmount.toString() ?? '';
-      _balanceAmountController.text = (widget.jobData.totalAmount -
-              widget.jobData.paidAmount)
-          .toStringAsFixed(2);
-      _statusSelected = widget.jobData.status ?? '';
-      _paymentMode = widget.jobData.paymentType ?? '';
-    }
+    _editDetails();
+    _validateItems();
   }
 
   @override
@@ -147,197 +91,133 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
 
   Future<void> _fetchData() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _userId = prefs.getString('userId') ?? '';
-      _companyId = prefs.getString('companyId') ?? '';
-    });
+    _userId = prefs.getString('userId') ?? '';
+    _companyId = prefs.getString('companyId') ?? '';
+    context.read<AddProductsCubit>().getProduct(context, _companyId!);
   }
 
-  void _updateBalanceAmount() {
-    final totalAmount = _spareBoxes.fold<double>(
-      0,
-      (sum, box) => sum + ((box['quantity'] ?? 0) * (box['price'] ?? 0.0)),
-    );
-    final paidAmount = double.tryParse(_paidAmountController.text) ?? 0.0;
-    final balance = totalAmount - paidAmount;
-    if (mounted) {
-      _balanceAmountController.text = balance.toStringAsFixed(2);
+  void _editDetails() {
+    if (widget.jobData != null) {
+      _customerNameController.text = widget.jobData.customerName ?? '';
+      _phoneNumberController.text = widget.jobData.phoneNumber ?? '';
+      _alternatePhoneNumberController.text = widget.jobData.alternatePhoneNumber ?? '';
+      _addressController.text = widget.jobData.address ?? '';
+      _statusDescriptionController.text = widget.jobData.statusDescription ?? '';
+      _productOrderNameController.text = widget.jobData.productName ?? '';
+      _modelNumberController.text = widget.jobData.modelNumber ?? '';
+      _serialNumberController.text = widget.jobData.serialNumber ?? '';
+      _orderComplaintController.text = widget.jobData.complaint ?? '';
+      _otherAccessoriesController.text = widget.jobData.otherAccessories ?? '';
+      _paidAmountController.text = widget.jobData.paidAmount?.toString() ?? '';
+      _balanceAmountController.text = ((widget.jobData.totalAmount ?? 0) - (widget.jobData.paidAmount ?? 0)).toStringAsFixed(2);
+      _statusSelected = widget.jobData.status ?? '';
+      _paymentMode = widget.jobData.paymentType ?? '';
     }
   }
 
-  void _showStatusDialog() {
+  void _updateBalanceAmount() {
+    final totalAmount = _spareBoxes.fold<double>(0, (sum, box) => sum + ((box['quantity'] ?? 0) * (box['price'] ?? 0.0)));
+    final paidAmount = double.tryParse(_paidAmountController.text) ?? 0.0;
+    _balanceAmountController.text = (totalAmount - paidAmount).toStringAsFixed(2);
+  }
+
+  void _showStatusDialog() => _showRadioDialog(
+    title: 'Select Status',
+    options: _statuses,
+    selected: _statusSelected,
+    onSelected: (value) => setState(() => _statusSelected = value),
+  );
+
+  void _showPaymentDialog() => _showRadioDialog(
+    title: 'Select Payment Mode',
+    options: _payments,
+    selected: _paymentMode,
+    onSelected: (value) => setState(() => _paymentMode = value),
+  );
+
+  void _showRadioDialog({required String title, required List<String> options, required String? selected, required ValueChanged<String> onSelected}) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        String? tempSelectedStatus = _statusSelected;
+      builder: (context) {
+        String? tempSelected = selected;
         return AlertDialog(
           backgroundColor: AppColor.white,
-          title: Text('Select Status'),
+          title: Text(title),
           content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return SizedBox(
-                width: double.maxFinite,
-                child: ListView(
-                  shrinkWrap: true,
-                  children:
-                      _statuses.map((status) {
-                        return RadioListTile<String>(
-                          fillColor: MaterialStateProperty.all(AppColor.blue),
-                          title: Text(status),
-                          value: status,
-                          groupValue: tempSelectedStatus,
-                          onChanged: (value) {
-                            setState(() {
-                              tempSelectedStatus = value;
-                            });
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        );
-                      }).toList(),
-                ),
-              );
-            },
+            builder: (context, setState) => SizedBox(
+              width: double.maxFinite,
+              child: ListView(
+                shrinkWrap: true,
+                children: options.map((option) => RadioListTile<String>(
+                  fillColor: MaterialStateProperty.all(AppColor.blue),
+                  title: Text(option),
+                  value: option,
+                  groupValue: tempSelected,
+                  onChanged: (value) => setState(() => tempSelected = value),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                )).toList(),
+              ),
+            ),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel', style: TextStyle(color: AppColor.black)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('OK', style: TextStyle(color: AppColor.blue)),
-              onPressed: () {
-                setState(() {
-                  _statusSelected = tempSelectedStatus;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
+          actions: [
+            TextButton(child:  Text('Cancel', style: TextStyle(color: AppColor.black)), onPressed: () => Navigator.of(context).pop()),
+            TextButton(child:  Text('OK', style: TextStyle(color: AppColor.blue)), onPressed: () {
+              onSelected(tempSelected ?? '');
+              Navigator.of(context).pop();
+            }),
           ],
         );
       },
     );
   }
 
-  void _showPaymentDialog() {
+  void _showSelectProductDialogForSpareBox(int index) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        String? tempPaymentMode = _paymentMode;
+      builder: (context) {
+        String? tempProduct = _spareBoxes[index]['selectedProduct'];
         return AlertDialog(
           backgroundColor: AppColor.white,
-          title: Text('Select Payment Mode'),
+          title: const Text('Select Product'),
           content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return SizedBox(
-                width: double.maxFinite,
-                child: ListView(
-                  shrinkWrap: true,
-                  children:
-                      _payments.map((payment) {
-                        return RadioListTile<String>(
-                          fillColor: WidgetStateProperty.all(Colors.blue),
-                          title: Text(payment),
-                          value: payment,
-                          groupValue: tempPaymentMode,
-                          onChanged: (value) {
-                            setState(() {
-                              tempPaymentMode = value;
-                            });
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        );
-                      }).toList(),
-                ),
-              );
-            },
+            builder: (context, setState) => SizedBox(
+              width: double.maxFinite,
+              child: ListView(
+                shrinkWrap: true,
+                children: _selectProducts.map((product) => RadioListTile<String>(
+                  fillColor: MaterialStateProperty.all(AppColor.blue),
+                  title: Text(product.productName ?? ''),
+                  value: product.productName ?? '',
+                  groupValue: tempProduct,
+                  onChanged: (value) => setState(() => tempProduct = value),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                )).toList(),
+              ),
+            ),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel', style: TextStyle(color: AppColor.black)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('OK', style: TextStyle(color: AppColor.blue)),
-              onPressed: () {
-                setState(() {
-                  _paymentMode = tempPaymentMode!;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
+          actions: [
+            TextButton(child:  Text('Cancel', style: TextStyle(color: AppColor.black)), onPressed: () => Navigator.of(context).pop()),
+            TextButton(child:  Text('OK', style: TextStyle(color: AppColor.blue)), onPressed: () {
+              setState(() {
+                _spareBoxes[index]['selectedProduct'] = tempProduct;
+                _spareBoxes[index]['showOtherItemsFields'] = tempProduct == 'Others Items';
+              });
+              Navigator.of(context).pop();
+            }),
           ],
         );
       },
     );
   }
 
-  void _showSelectProductDialogForSpareBox(int spareBoxIndex) {
-    print(spareBoxIndex);
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String? tempProductMode = _spareBoxes[spareBoxIndex]['selectedProduct'];
-        return AlertDialog(
-          backgroundColor: AppColor.white,
-          title: Text('Select Product'),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return SizedBox(
-                width: double.maxFinite,
-                child: ListView(
-                  shrinkWrap: true,
-                  children:
-                      _selectProducts.map((product) {
-                        return RadioListTile<String>(
-                          fillColor: WidgetStateProperty.all(Colors.blue),
-                          title: Text(product),
-                          value: product,
-                          groupValue: tempProductMode,
-                          onChanged: (value) {
-                            setState(() {
-                              tempProductMode = value;
-                            });
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        );
-                      }).toList(),
-                ),
-              );
-            },
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel', style: TextStyle(color: AppColor.black)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('OK', style: TextStyle(color: AppColor.blue)),
-              onPressed: () {
-                setState(() {
-                  _spareBoxes[spareBoxIndex]['selectedProduct'] =
-                      tempProductMode;
-                  _spareBoxes[spareBoxIndex]['showOtherItemsFields'] =
-                      tempProductMode == 'Other Items';
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  void _validateItems() {
+    final isValid = _spareBoxes.every((box) {
+      final name = (box['name'] as String?)?.trim() ?? '';
+      final quantity = box['quantity'] as int? ?? 0;
+      final price = box['price'] as double? ?? 0.0;
+      return name.isNotEmpty && quantity > 0 && price > 0.0;
+    });
+    setState(() => buttonError = !isValid);
   }
 
   @override
@@ -345,14 +225,11 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 3,
-        title: Text(widget.title == 'Edit Job' ? 'Edit Details' : 'Add Job'),
+        title: Text(widget.title == 'Edit Job' ? 'Edit Details' : 'Add Details'),
         backgroundColor: AppColor.white,
         centerTitle: true,
         shadowColor: AppColor.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
       ),
       backgroundColor: AppColor.white,
       body: SingleChildScrollView(
@@ -363,180 +240,54 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SectionHeader(Icons.person_2_outlined, 'Customer Details'),
-              customTextField(
-                _customerNameController,
-                'Customer Name',
-                errorText: _nameError ? 'Please enter a customer name' : null,
-                onChanged: (value) {
-                  setState(() {
-                    _nameError = value.isEmpty;
-                  });
-                },
-              ),
-              customTextField(
-                _phoneNumberController,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ],
-                'Phone Number',
-                errorText: _phoneError ? 'Please enter a phone number' : null,
-                onChanged: (value) {
-                  setState(() {
-                    _phoneError = value.isEmpty;
-                  });
-                },
-              ),
-              customTextField(
-                _alternatePhoneNumberController,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ],
-                'Alternate Phone Number',
-                errorText:
-                    _alternatePhoneError
-                        ? 'Please enter an alternate phone number'
-                        : null,
-                onChanged: (value) {
-                  setState(() {
-                    _alternatePhoneError = value.isEmpty;
-                  });
-                },
-              ),
-              customTextField(
-                _addressController,
-                'Address',
-                errorText: _addressError ? 'Please enter an address' : null,
-                onChanged: (value) {
-                  setState(() {
-                    _addressError = value.isEmpty;
-                  });
-                },
-              ),
-
+              customTextField(_customerNameController, 'Customer Name', errorText: _nameError ? 'Please enter a customer name' : null, onChanged: (v) => setState(() => _nameError = v.isEmpty)),
+              customTextField(_phoneNumberController, inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)], 'Phone Number', errorText: _phoneError ? 'Please enter a phone number' : null, onChanged: (v) => setState(() => _phoneError = v.isEmpty)),
+              customTextField(_alternatePhoneNumberController, inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)], 'Alternate Phone Number', errorText: _alternatePhoneError ? 'Please enter an alternate phone number' : null, onChanged: (v) => setState(() => _alternatePhoneError = v.isEmpty)),
+              customTextField(_addressController, 'Address', errorText: _addressError ? 'Please enter an address' : null, onChanged: (v) => setState(() => _addressError = v.isEmpty)),
               const SectionHeader(Icons.wifi, 'Status Details'),
-              CustomDropdownField(
-                hintText: 'Select Status',
-                selectedValue: _statusSelected,
-                onTap: _showStatusDialog,
-              ),
-              _statusError
-                  ? Text(
-                    'please select status',
-                    style: TextStyle(
-                      color: AppColor.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                  : SizedBox(),
+              CustomDropdownField(hintText: 'Select Status', selectedValue: _statusSelected, onTap: _showStatusDialog),
+              if (_statusError) Text('please select status', style: TextStyle(color: AppColor.red, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
-              customTextField(
-                _statusDescriptionController,
-                'Status Description',
-                errorText:
-                    _statusDescriptionError
-                        ? 'Please enter a status description'
-                        : null,
-                onChanged: (value) {
-                  setState(() {
-                    _statusDescriptionError = value.isEmpty;
-                  });
-                },
-              ),
+              customTextField(_statusDescriptionController, 'Status Description', errorText: _statusDescriptionError ? 'Please enter a status description' : null, onChanged: (v) => setState(() => _statusDescriptionError = v.isEmpty)),
               const SectionHeader(Icons.build, 'Product / Order Details'),
-              customTextField(
-                _productOrderNameController,
-                'Product / Order Name',
-                errorText:
-                    _productOrderNameError
-                        ? 'Please enter a product / order name'
-                        : null,
-                onChanged: (value) {
-                  setState(() {
-                    _productOrderNameError = value.isEmpty;
-                  });
-                },
-              ),
-              customTextField(
-                _modelNumberController,
-                'Model Number',
-                errorText:
-                    _modelNumberError ? 'Please enter a model number' : null,
-                onChanged: (value) {
-                  setState(() {
-                    _modelNumberError = value.isEmpty;
-                  });
-                },
-              ),
-              customTextField(
-                _serialNumberController,
-                'Serial Number',
-                errorText:
-                    _serialNumberError ? 'Please enter a serial number' : null,
-                onChanged: (value) {
-                  setState(() {
-                    _serialNumberError = value.isEmpty;
-                  });
-                },
-              ),
-              customTextField(
-                _orderComplaintController,
-                'Order / Complaint',
-                errorText:
-                    _orderComplaintError
-                        ? 'Please enter an order / complaint'
-                        : null,
-                onChanged: (value) {
-                  setState(() {
-                    _orderComplaintError = value.isEmpty;
-                  });
-                },
-              ),
-              customTextField(
-                _otherAccessoriesController,
-                'Other Accessories',
-                errorText:
-                    _otherAccessoriesError
-                        ? 'Please enter other accessories'
-                        : null,
-                onChanged: (value) {
-                  setState(() {
-                    _otherAccessoriesError = value.isEmpty;
-                  });
-                },
-              ),
-              const SectionHeader(
-                Icons.circle,
-                'Spares / Estimations / Services',
-              ),
-              BlocListener<AllBillsCubit, AllBillsState>(
-                listener: (context, state) {
-                  if (state is SpareBillsLoaded) {
-                    setState(() {
-                      if (state.billSparesModel.data != null &&
-                          state.billSparesModel.data!.isNotEmpty) {
-                        _spareBoxes =
-                            state.billSparesModel.data!.map((spare) {
-                              return {
-                                'id': spare.id,
-                                'quantity': spare.quantity ?? 0,
-                                'price': spare.price ?? 0.0,
-                                'total':
-                                    (spare.quantity ?? 0) *
-                                    (spare.price ?? 0.0),
-                                'name': spare.product ?? '',
-                                'description': spare.description ?? '',
-                                'selectedProduct': spare.product ?? '',
-                                'showOtherItemsFields': false,
-                              };
+              customTextField(_productOrderNameController, 'Product / Order Name', errorText: _productOrderNameError ? 'Please enter a product / order name' : null, onChanged: (v) => setState(() => _productOrderNameError = v.isEmpty)),
+              customTextField(_modelNumberController, 'Model Number', errorText: _modelNumberError ? 'Please enter a model number' : null, onChanged: (v) => setState(() => _modelNumberError = v.isEmpty)),
+              customTextField(_serialNumberController, 'Serial Number', errorText: _serialNumberError ? 'Please enter a serial number' : null, onChanged: (v) => setState(() => _serialNumberError = v.isEmpty)),
+              customTextField(_orderComplaintController, 'Order / Complaint', errorText: _orderComplaintError ? 'Please enter an order / complaint' : null, onChanged: (v) => setState(() => _orderComplaintError = v.isEmpty)),
+              customTextField(_otherAccessoriesController, 'Other Accessories', errorText: _otherAccessoriesError ? 'Please enter other accessories' : null, onChanged: (v) => setState(() => _otherAccessoriesError = v.isEmpty)),
+              const SectionHeader(Icons.circle, 'Spares / Estimations / Services'),
+              MultiBlocListener(
+                listeners: [
+                  BlocListener<AllBillsCubit, AllBillsState>(
+                    listener: (context, state) {
+                      if (state is SpareBillsLoaded) {
+                        setState(() {
+                          if (state.billSparesModel.data != null && state.billSparesModel.data!.isNotEmpty) {
+                            _spareBoxes = state.billSparesModel.data!.map((spare) => {
+                              'id': spare.id,
+                              'quantity': spare.quantity ?? 0,
+                              'price': spare.price ?? 0.0,
+                              'total': (spare.quantity ?? 0) * (spare.price ?? 0.0),
+                              'name': spare.product ?? '',
+                              'description': spare.description ?? '',
+                              'selectedProduct': spare.product ?? '',
+                              'showOtherItemsFields': false,
+                              'productId': spare.productId ?? '',
                             }).toList();
-                      } else {
-                        _spareBoxes = [];
+                            _validateItems();
+                          }
+                        });
                       }
-                    });
-                  }
-                },
+                    },
+                  ),
+                  BlocListener<AddProductsCubit, AddProductsState>(
+                    listener: (context, state) {
+                      if (state is GetProductsLoaded) {
+                        setState(() => _selectProducts = state.getProductsListModel.data ?? []);
+                      }
+                    },
+                  ),
+                ],
                 child: Column(
                   children: [
                     if (_spareBoxes.isNotEmpty)
@@ -546,86 +297,105 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
                           key: ValueKey(currentSpareBoxData['id']),
                           index: index,
                           spareBox: currentSpareBoxData,
-                          selectedProduct:
-                              currentSpareBoxData['selectedProduct'],
-                          showOtherItemsFields:
-                              currentSpareBoxData['showOtherItemsFields'],
-                          onNameChanged: (value) {
-                            setState(() {
-                              currentSpareBoxData['name'] = value;
-                            });
-                          },
-                          onDescriptionChanged: (value) {
-                            setState(() {
-                              currentSpareBoxData['description'] = value;
-                            });
-                          },
-                          onQuantityChanged: (value) {
-                            setState(() {
-                              currentSpareBoxData['quantity'] =
-                                  int.tryParse(value) ?? 0;
-                              currentSpareBoxData['total'] =
-                                  (currentSpareBoxData['quantity'] ?? 0) *
-                                  (currentSpareBoxData['price'] ?? 0.0);
+                          selectedProduct: currentSpareBoxData['selectedProduct'],
+                          showOtherItemsFields: currentSpareBoxData['showOtherItemsFields'],
+                          onNameChanged: (v) => setState(() { currentSpareBoxData['name'] = v; _validateItems(); }),
+                          onDescriptionChanged: (v) => setState(() => currentSpareBoxData['description'] = v),
+                          onQuantityChanged: (v) => setState(() {
+                            currentSpareBoxData['quantity'] = int.tryParse(v) ?? 0;
+                            currentSpareBoxData['total'] = (currentSpareBoxData['quantity'] ?? 0) * (currentSpareBoxData['price'] ?? 0.0);
+                            _updateBalanceAmount();
+                            _validateItems();
+                          }),
+                          onPriceChanged: (v) => setState(() {
+                            currentSpareBoxData['price'] = double.tryParse(v) ?? 0.0;
+                            currentSpareBoxData['total'] = (currentSpareBoxData['quantity'] ?? 0) * (currentSpareBoxData['price'] ?? 0.0);
+                            _updateBalanceAmount();
+                            _validateItems();
+                          }),
+                          onDelete: () => setState(() {
+                            _spareBoxes.removeAt(index);
+                            _updateBalanceAmount();
+                            _validateItems();
+                          }),
+                          onSelectProductTap: () {
+                            _showSelectProductDialogForSpareBox(index);
+                            if (currentSpareBoxData['selectedProduct'] != null) {
+                              final selectedProduct = _selectProducts.firstWhere(
+                                (product) => product.productName == currentSpareBoxData['selectedProduct'],
+                                orElse: () => Data(),
+                              );
+                              setState(() {
+                                currentSpareBoxData['productId'] = selectedProduct.id;
+                                currentSpareBoxData['price'] = selectedProduct.price ?? 0.0;
+                                currentSpareBoxData['quantity'] = selectedProduct.quantity ?? 0;
+                                currentSpareBoxData['name'] = selectedProduct.productName ?? '';
+                                currentSpareBoxData['description'] = selectedProduct.description ?? '';
+                                currentSpareBoxData['total'] = (selectedProduct.quantity ?? 0) * (selectedProduct.price ?? 0.0);
+                              });
                               _updateBalanceAmount();
-                            });
+                            }
                           },
-                          onPriceChanged: (value) {
-                            setState(() {
-                              currentSpareBoxData['price'] =
-                                  double.tryParse(value) ?? 0.0;
-                              currentSpareBoxData['total'] =
-                                  (currentSpareBoxData['quantity'] ?? 0) *
-                                  (currentSpareBoxData['price'] ?? 0.0);
-                              _updateBalanceAmount();
-                            });
-                          },
-                          onDelete: () {
-                            setState(() {
-                              _spareBoxes.removeAt(index);
-                              _updateBalanceAmount();
-                            });
-                          },
-                          onSelectProductTap:
-                              () => _showSelectProductDialogForSpareBox(index),
                         );
                       }),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            _spareBoxes.add({
-                              'id':
-                                  DateTime.now().microsecondsSinceEpoch
-                                      .toString(),
-                              'quantity': 0,
-                              'price': 0.0,
-                              'total': 0.0,
-                              'name': '',
-                              'description': '',
-                              'selectedProduct': null,
-                              'showOtherItemsFields': false,
+                          final canAddNew = _spareBoxes.isEmpty ||
+                              (_spareBoxes.isNotEmpty &&
+                                  _spareBoxes.last['selectedProduct'] != null &&
+                                  (_spareBoxes.last['quantity'] ?? 0) > 0 &&
+                                  (_spareBoxes.last['price'] ?? 0) > 0);
+                          if (canAddNew) {
+                            setState(() {
+                              _spareBoxes.add({
+                                'id': DateTime.now().microsecondsSinceEpoch.toString(),
+                                'productId': '',
+                                'quantity': 0,
+                                'price': 0.0,
+                                'total': 0.0,
+                                'name': '',
+                                'description': '',
+                                'selectedProduct': null,
+                                'showOtherItemsFields': false,
+                              });
+                              _validateItems();
                             });
-                          });
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColor.white,
-                          side: BorderSide(color: AppColor.blue),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
+                          side: BorderSide(
+                            color: _spareBoxes.isEmpty ||
+                                    (_spareBoxes.isNotEmpty &&
+                                        _spareBoxes.last['selectedProduct'] != null &&
+                                        (_spareBoxes.last['quantity'] ?? 0) > 0 &&
+                                        (_spareBoxes.last['price'] ?? 0) > 0)
+                                ? AppColor.blue
+                                : AppColor.gray,
                           ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.add, color: AppColor.blue),
-                            SizedBox(width: 8),
-                            Text(
-                              'ADD SPARES',
-                              style: TextStyle(color: AppColor.blue),
-                            ),
+                            Icon(Icons.add, color: _spareBoxes.isEmpty ||
+                                    (_spareBoxes.isNotEmpty &&
+                                        _spareBoxes.last['selectedProduct'] != null &&
+                                        (_spareBoxes.last['quantity'] ?? 0) > 0 &&
+                                        (_spareBoxes.last['price'] ?? 0) > 0)
+                                ? AppColor.blue
+                                : AppColor.gray),
+                            const SizedBox(width: 8),
+                            Text('ADD SPARES', style: TextStyle(color: _spareBoxes.isEmpty ||
+                                    (_spareBoxes.isNotEmpty &&
+                                        _spareBoxes.last['selectedProduct'] != null &&
+                                        (_spareBoxes.last['quantity'] ?? 0) > 0 &&
+                                        (_spareBoxes.last['price'] ?? 0) > 0)
+                                ? AppColor.blue
+                                : AppColor.gray)),
                           ],
                         ),
                       ),
@@ -633,47 +403,22 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
                   ],
                 ),
               ),
-
               Text(
                 'Total Amount: ₹${_spareBoxes.fold<double>(0, (sum, box) => sum + ((box['quantity'] ?? 0) * (box['price'] ?? 0.0))).toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: getHeight(context) * 0.01),
-              customTextField(
-                _paidAmountController,
-                'Paid Amount',
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                errorText:
-                    _paidAmountError ? 'Please enter a paid amount' : null,
-                onChanged: (value) {
-                  setState(() {
-                    _paidAmountError = value.isEmpty;
-                  });
-                  _updateBalanceAmount();
-                },
-              ),
-              customTextField(
-                _balanceAmountController,
-                enabled: false,
-                'Balance Amount',
-                errorText:
-                    _balanceAmountError
-                        ? 'Please enter a balance amount'
-                        : null,
-                onChanged: (value) {},
-              ),
-              CustomDropdownField(
-                hintText: 'Select Payment Mode',
-                selectedValue: _paymentMode.isEmpty ? null : _paymentMode,
-                onTap: _showPaymentDialog,
-              ),
+              customTextField(_paidAmountController, 'Paid Amount', inputFormatters: [FilteringTextInputFormatter.digitsOnly], errorText: _paidAmountError ? 'Please enter a paid amount' : null, onChanged: (v) {
+                setState(() => _paidAmountError = v.isEmpty);
+                _updateBalanceAmount();
+              }),
+              customTextField(_balanceAmountController, enabled: false, 'Balance Amount', errorText: _balanceAmountError ? 'Please enter a balance amount' : null, onChanged: (_) {}),
+              CustomDropdownField(hintText: 'Select Payment Mode', selectedValue: _paymentMode?.isEmpty ?? true ? null : _paymentMode, onTap: _showPaymentDialog),
               SizedBox(height: getHeight(context) * 0.01),
               buildButton(
                 text: 'SUBMIT',
                 isLoading: isLoading,
+                error: buttonError,
                 handleAction: () async {
                   if (_formKey.currentState!.validate()) {
                     setState(() {
@@ -681,128 +426,77 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
                       _nameError = _customerNameController.text.isEmpty;
                       _phoneError = _phoneNumberController.text.isEmpty;
                       _addressError = _addressController.text.isEmpty;
-                      _productOrderNameError =
-                          _productOrderNameController.text.isEmpty;
+                      _productOrderNameError = _productOrderNameController.text.isEmpty;
                       _modelNumberError = _modelNumberController.text.isEmpty;
                       _serialNumberError = _serialNumberController.text.isEmpty;
-                      _orderComplaintError =
-                          _orderComplaintController.text.isEmpty;
-                      _spareBoxes.length == 0;
-                      _statusSelected == '';
+                      _orderComplaintError = _orderComplaintController.text.isEmpty;
+                      _sparesError = _spareBoxes.isEmpty;
+                      _statusError = _statusSelected == null || _statusSelected!.isEmpty;
                     });
 
+                    if (_nameError || _phoneError || _alternatePhoneError || _addressError || _productOrderNameError || _modelNumberError || _serialNumberError || _orderComplaintError || _otherAccessoriesError || _statusError) {
+                      setState(() => isLoading = false);
+                      return;
+                    }
                     try {
-                      if (_nameError ||
-                          _phoneError ||
-                          _alternatePhoneError ||
-                          _addressError ||
-                          _productOrderNameError ||
-                          _modelNumberError ||
-                          _serialNumberError ||
-                          _orderComplaintError ||
-                          _otherAccessoriesError ||
-                          _statusError) {
-                        return;
-                      }
+                      final billSpares = _spareBoxes.map((spareBox) => {
+                        "id": widget.title == 'Edit Job' ? widget.jobData.id : null,
+                        "billId": null,
+                        "productId": "2855035b-18f8-4c3a-9a90-812788f70d95",
+                        "product": spareBox['selectedProduct'] ?? spareBox['name'] ?? '',
+                        "quantity": spareBox['quantity'],
+                        "price": spareBox['price'],
+                        "description": spareBox['description'] ?? "",
+                        "productList": {
+                          "id": "2855035b-18f8-4c3a-9a90-812788f70d95",
+                          "productName": spareBox['name'] ?? "JR_OTHER_PRODUCT",
+                          "price": spareBox['price'] ?? 0.0,
+                          "quantity": spareBox['quantity'] ?? 0,
+                          "description": spareBox['description'] ?? "",
+                          "userId": _userId,
+                          "companyId": _companyId,
+                        },
+                        "otherProduct": spareBox['selectedProduct'] == 'Other Items',
+                        "selectedProduct": spareBox['selectedProduct'],
+                      }).toList();
 
-                      List<Map<String, dynamic>> billSpares =
-                          _spareBoxes.map((spareBox) {
-                            print(widget.jobData.id);
-                            return {
-                              "id": widget.title == 'Edit Job'
-                                  ? widget.jobData.id
-                                  : null,
-                              "billId": null,
-                              "productId": "2855035b-18f8-4c3a-9a90-812788f70d95",
-                              "product": spareBox['selectedProduct'],
-                              "quantity": spareBox['quantity'],
-                              "price": spareBox['price'],
-                              "description": spareBox['description'] ?? "",
-                              "productList": {
-                                "id": "2855035b-18f8-4c3a-9a90-812788f70d95",
-                                "productName":
-                                    spareBox['name'] ?? "JR_OTHER_PRODUCT",
-                                "price": spareBox['price'] ?? 0.0,
-                                "quantity": spareBox['quantity'] ?? 0,
-                                "description": spareBox['description'] ?? "",
-                                "userId": _userId,
-                                "companyId": _companyId,
-                              },
-                              "otherProduct":
-                                  spareBox['selectedProduct'] == 'Other Items',
-                              "selectedProduct": spareBox['selectedProduct'],
-                            };
-                          }).toList();
+                      final totalAmountForApi = _spareBoxes.fold<double>(0, (sum, box) => sum + ((box['quantity'] ?? 0) * (box['price'] ?? 0.0)));
 
-                      final totalAmountForApi = _spareBoxes.fold<double>(
-                        0,
-                        (sum, box) =>
-                            sum +
-                            ((box['quantity'] ?? 0) * (box['price'] ?? 0.0)),
-                      );
+                      await context.read<SaveBillCubit>().save_bill(context, {
+                        "id": widget.title == 'Edit Job' ? widget.jobData.id : null,
+                        "billId": null,
+                        "customerName": _customerNameController.text,
+                        "address": _addressController.text,
+                        "phoneNumber": _phoneNumberController.text,
+                        "productName": _productOrderNameController.text,
+                        "modelNumber": _modelNumberController.text,
+                        "serialNumber": _serialNumberController.text,
+                        "complaint": _orderComplaintController.text,
+                        "otherAccessories": _otherAccessoriesController.text,
+                        "status": _statusSelected,
+                        "paidAmount": double.tryParse(_paidAmountController.text) ?? 0.0,
+                        "totalAmount": totalAmountForApi,
+                        "paymentType": _paymentMode,
+                        "statusDescription": _statusDescriptionController.text,
+                        "userId": _userId,
+                        "companyId": _companyId,
+                        "billSpares": billSpares,
+                      }, widget.companyName.toString(), 0);
 
-                      await context.read<SaveBillCubit>().save_bill(
-                            context,
-                            {
-                              "id": widget.title == 'Edit Job'
-                                  ? widget.jobData.id
-                                  : null,
-                              "billId": null,
-                              "customerName": _customerNameController.text,
-                              "address": _addressController.text,
-                              "phoneNumber": _phoneNumberController.text,
-                              "productName": _productOrderNameController.text,
-                              "modelNumber": _modelNumberController.text,
-                              "serialNumber": _serialNumberController.text,
-                              "complaint": _orderComplaintController.text,
-                              "otherAccessories":
-                                  _otherAccessoriesController.text,
-                              "status": _statusSelected,
-                              "paidAmount":
-                                  double.tryParse(_paidAmountController.text) ??
-                                      0.0,
-                              "totalAmount": totalAmountForApi,
-                              "paymentType": _paymentMode,
-                              "statusDescription":
-                                  _statusDescriptionController.text,
-                              "userId": _userId,
-                              "companyId": _companyId,
-                              "billSpares": billSpares,
-                            },
-                            widget.companyName.toString(),
-                          );
-                    } finally {
+                      if (mounted) setState(() => isLoading = false);
+                    } catch (e) {
                       if (mounted) {
-                        setState(() {
-                          isLoading = false;
-                        });
+                        setState(() => isLoading = false);
+                        CustomSnackbars.showErrorSnack(
+                          context: context,
+                          title: 'Alert',
+                          message: 'Something went wrong, please try again',
+                        );
                       }
                     }
                   }
                 },
               ),
-
-              // SizedBox(
-              //   width: double.infinity,
-
-              //   child: ElevatedButton(
-
-              //     onPressed: () {
-
-              //     },
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: AppColor.blue,
-              //       side: BorderSide(color: AppColor.blue),
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(4),
-              //       ),
-              //     ),
-              //     child: Text(
-              //       'Submit',
-              //       style: TextStyle(color: AppColor.white, fontWeight: FontWeight.bold),
-              //     ),
-              //   ),
-              // ),
               SizedBox(height: getHeight(context) * 0.05),
             ],
           ),

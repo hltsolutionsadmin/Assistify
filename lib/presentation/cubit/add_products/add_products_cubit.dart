@@ -85,4 +85,32 @@ class AddProductsCubit extends Cubit<AddProductsState> {
       emit(EditProductsError('Failed to load editProductsEntity data: ${e.toString()}'));
     }
   }
+  
+  Future<void> getProduct(
+    BuildContext context,
+    String companyId,
+  ) async {
+    bool isConnected = await networkService.hasInternetConnection();
+    print(isConnected);
+    if (!isConnected) {
+      print("No Internet Connection");
+      CustomSnackbars.showErrorSnack(
+        context: context,
+        title: 'Alert',
+        message: 'Please check Internet Connection',
+      );
+      return;
+    }
+    try {
+      emit(GetProductsLoading());
+      final getProductsEntity = await useCase.get_products(companyId);
+      print(getProductsEntity);
+      if (getProductsEntity.status == 'SUCCESS') {
+        emit(GetProductsLoaded(getProductsEntity));
+      }
+    } catch (e) {
+      print('error in allbills: $e');
+      emit(GetProductsError('Failed to load editProductsEntity data: ${e.toString()}'));
+    }
+  }
 }

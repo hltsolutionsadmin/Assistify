@@ -1,68 +1,65 @@
 import 'package:assistify/core/constants/colors.dart';
-import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-Widget BuildSearchField({required BuildContext context, required searchController, searchFocusNode, required fetchData, required userId, required companyId}) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-      child: TextField(
-        controller: searchController,
-        focusNode: searchFocusNode,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        autofocus: false,
-        style: TextStyle(fontSize: 14),
-        decoration: InputDecoration(
-          hintText: 'Search by jobId',
-          prefixIcon: Icon(Icons.search),
-          suffixIcon: searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: Icon(Icons.clear),
-                  onPressed: () {
-                    searchController.clear();
-                    fetchData();
-                  },
-                )
-              : null,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColor.gray),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColor.gray),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColor.blue, width: 2),
-          ),
-          filled: true,
-          fillColor: AppColor.white,
-          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          isDense: true,
-        ),
-        onChanged: (value) {
-          if (value.isEmpty) {
-            fetchData();
-          } else {
-            Future.delayed(Duration(milliseconds: 100), () {
-              if (value == searchController.text) {
-                context.read<AllBillsCubit>().searchBills(
-                  context: context,
-                  jobId: value,
-                  userId: userId,
-                  companyId: companyId
-                );
-              }
-            });
-          }
+Widget BuildSearchField({
+  required BuildContext context,
+  required TextEditingController searchController,
+  required Function(String) onChanged,
+  required fetchData,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+    child: Focus(
+      autofocus: false,
+      child: Builder(
+        builder: (innerContext) {
+          return GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: TextField(
+              controller: searchController,
+              inputFormatters: [
+                // FilteringTextInputFormatter.digitsOnly,
+              ],
+              autofocus: false,
+              style: const TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: 'Search by jobId / Mobile Number',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          searchController.clear();
+                          fetchData();
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: AppColor.gray),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: AppColor.gray),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: AppColor.blue, width: 2),
+                ),
+                filled: true,
+                fillColor: AppColor.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                isDense: true,
+              ),
+              onChanged: onChanged,
+            ),
+          );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
     Widget BuildDrawerItem(
     IconData icon,

@@ -19,7 +19,9 @@ import 'package:path_provider/path_provider.dart';
 class PrintingCard extends StatefulWidget {
   final String? title;
   final dynamic data;
-  const PrintingCard({super.key, this.title, required this.data});
+  num? category;
+  final String? companyName;
+  PrintingCard({super.key, this.title, required this.data, this.category, this.companyName});
   @override
   State<PrintingCard> createState() => _PrintingCardState();
 }
@@ -27,30 +29,37 @@ class PrintingCard extends StatefulWidget {
 class _PrintingCardState extends State<PrintingCard> {
   void initState() {
     super.initState();
+    print(widget.category);
     context.read<AllBillsCubit>().spareBills(
       context: context,
       jobId: widget.data.id,
     );
     userBanner();
-  
   }
-  String bannerImage = '';
 
-userBanner() async {
-  final userProfileCubit = context.read<UserProfileCubit>();
-  await userProfileCubit.userProfile(
-    context,
-    widget.data.companyId,
-  );
-  final profile = userProfileCubit.state;
-  if(profile is UserProfileLoaded) {
-    bannerImage = profile.userProfileModel.data?.bannerImage ?? '';
+  String bannerImage = '';
+  String logo = '';
+
+  userBanner() async {
+    final userProfileCubit = context.read<UserProfileCubit>();
+    await userProfileCubit.userProfile(context, widget.data.companyId);
+    final profile = userProfileCubit.state;
+    if (profile is UserProfileLoaded) {
+      bannerImage = profile.userProfileModel.data?.bannerImage ?? '';
+      logo = profile.userProfileModel.data?.logo ?? '';
+    }
   }
-}
 
   dynamic spare_Bills = [];
   Future<void> _handlePrintAction() async {
-    final pdf = await generatePdf(widget.title, widget.data, spare_Bills, bannerImage, context);
+    final pdf = await generatePdf(
+      widget.title,
+      widget.data,
+      spare_Bills,
+      bannerImage,
+      context,
+      widget.category,
+    );
     final bytes = await pdf.save();
 
     showModalBottomSheet(
@@ -77,15 +86,16 @@ userBanner() async {
                 onTap: () async {
                   Navigator.pop(context);
                   final dir = await getTemporaryDirectory();
-                  final file = File('${dir.path}/${widget.title}.pdf');
+                  final file = File('${dir.path}/${DateTime.now().toString()}_${widget.title}.pdf');
                   await file.writeAsBytes(bytes);
                   await Share.shareXFiles(
                     [XFile(file.path)],
                     text: 'Share PDF Document',
-                    subject: widget.title ?? 'Document',
+                    subject: '${widget.title}_${DateTime.now().toString()}' ?? 'Document',
                   );
                 },
               ),
+              SizedBox(height: 30,)
             ],
           ),
         );
@@ -131,7 +141,7 @@ userBanner() async {
                   showDialog(
                     context: context,
                     builder: (context) {
-                      return PrintScreen(data: widget.data);
+                      return PrintScreen(data: widget.data, companyName: widget.companyName, category: widget.category, spares : spare_Bills, logo : logo);
                     },
                   );
                 },
@@ -165,37 +175,42 @@ userBanner() async {
                     buildInfoRow("Address: ", '${widget.data.address ?? ''}'),
                     buildInfoRow("ph No: ", '${widget.data.phoneNumber ?? ''}'),
                     SizedBox(height: getHeight(context) * 0.02),
-                    Text(
-                      "PRODUCT & COMPLAINT INFO:",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColor.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    buildInfoRow(
-                      "Product: ",
-                      '${widget.data.productName ?? ''}',
-                    ),
-                    buildInfoRow(
-                      "Model No: ",
-                      '${widget.data.modelNumber ?? ''}',
-                    ),
-                    buildInfoRow(
-                      "Serial No: ",
-                      '${widget.data.serialNumber ?? ''}',
-                    ),
-                    buildInfoRow(
-                      "Complaint: ",
-                      '${widget.data.complaint ?? ''}',
-                    ),
-                    buildInfoRow(
-                      "Accessories: ",
-                      '${widget.data.otherAccessories?.isNotEmpty == true ? widget.data.otherAccessories : '--'}',
+                   widget.category == 2 ? SizedBox() : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "PRODUCT & COMPLAINT INFO:",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColor.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        buildInfoRow(
+                          "Product: ",
+                          '${widget.data.productName ?? ''}',
+                        ),
+                        buildInfoRow(
+                          "Model No: ",
+                          '${widget.data.modelNumber ?? ''}',
+                        ),
+                        buildInfoRow(
+                          "Serial No: ",
+                          '${widget.data.serialNumber ?? ''}',
+                        ),
+                        buildInfoRow(
+                          "Complaint: ",
+                          '${widget.data.complaint ?? ''}',
+                        ),
+                        buildInfoRow(
+                          "Accessories: ",
+                          '${widget.data.otherAccessories?.isNotEmpty == true ? widget.data.otherAccessories : '--'}',
+                        ),
+                      ],
                     ),
                     SizedBox(height: getHeight(context) * 0.02),
                     Text(
-                      'SPARES/ESTIMATIONS',
+                    widget.category == 2 ? 'ITEMS' :  'SPARES/ESTIMATIONS',
                       style: TextStyle(
                         fontSize: 16,
                         color: AppColor.black,

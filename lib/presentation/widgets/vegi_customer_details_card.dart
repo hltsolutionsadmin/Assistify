@@ -1,25 +1,38 @@
 import 'package:assistify/core/constants/colors.dart';
-import 'package:assistify/presentation/screen/addjob/add_job_form_screen.dart';
+import 'package:assistify/presentation/screen/addjob/add_items_screen.dart';
 import 'package:assistify/presentation/widgets/contact_popup_widget.dart';
 import 'package:assistify/presentation/widgets/file_popup_widget.dart';
+import 'package:assistify/presentation/widgets/printing_screen_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 // ignore: must_be_immutable
-class JobCard extends StatefulWidget {
-  final dynamic jobData;
+class VegiCustomerDetailsCard extends StatefulWidget {
+  final dynamic custData;
   final Function? fetchData;
   String? companyName;
   num? category;
-  JobCard({super.key, required this.jobData, this.fetchData, this.companyName, this.category});
+  VegiCustomerDetailsCard({
+    super.key,
+    required this.custData,
+    this.fetchData,
+    this.companyName,
+    this.category,
+  });
 
   @override
-  State<JobCard> createState() => _JobCardState();
+  State<VegiCustomerDetailsCard> createState() => _JobCardState();
 }
 
-class _JobCardState extends State<JobCard> {
+class _JobCardState extends State<VegiCustomerDetailsCard> {
   final DateFormat _dateFormat = DateFormat('dd MMM yyyy');
+  
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   print(widget.category);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +48,7 @@ class _JobCardState extends State<JobCard> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                 CircleAvatar(
+                CircleAvatar(
                   radius: 24,
                   backgroundColor: AppColor.gray,
                   child: Icon(Icons.person, size: 30),
@@ -46,7 +59,7 @@ class _JobCardState extends State<JobCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.jobData.customerName ?? 'No Name',
+                        widget.custData.customerName ?? 'No Name',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -54,7 +67,7 @@ class _JobCardState extends State<JobCard> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        "Job ID: ${widget.jobData?.jobId ?? ''}    Balance: ${(widget.jobData.totalAmount - widget.jobData.paidAmount) ?? 0}",
+                        "Balance: ${(widget.custData.totalAmount - widget.custData.paidAmount) ?? 0}",
                         style: TextStyle(fontSize: 13, color: Colors.red),
                       ),
                     ],
@@ -64,18 +77,20 @@ class _JobCardState extends State<JobCard> {
                   children: [
                     InkWell(
                       onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddJobFormScreen(
-                        jobData: widget.jobData,
-                        title: 'Edit Job',
-                        companyName: widget.companyName
-                      ),
-                    ),
-                  ).then((_) {
-                    if (widget.fetchData != null) widget.fetchData!();
-                  });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => AddItemsScreen(
+                                  jobData: widget.custData,
+                                  title: 'Edit Details',
+                                  companyName: widget.companyName,
+                                  category: widget.category,
+                                ),
+                          ),
+                        ).then((_) {
+                          if (widget.fetchData != null) widget.fetchData!();
+                        });
                       },
                       child: Icon(Icons.edit, size: 24),
                     ),
@@ -83,20 +98,30 @@ class _JobCardState extends State<JobCard> {
                     InkWell(
                       onTap:
                           () => {
-                            showFilePopup(
+                            // showFilePopup(
+                            //   context,
+                            //   widget.custData,
+                            //   widget.fetchData,
+                            //   widget.category,
+                            //   widget.companyName
+
+                            // ),
+                            Navigator.push(
                               context,
-                              widget.jobData,
-                              widget.fetchData,
-                              0,
-                              widget.companyName
-                            ),
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => PrintingCard(
+                                      title: 'Bill',
+                                      data: widget.custData,
+                                      category: widget.category,
+                                      companyName: widget.companyName,
+                                    ),
+                              ),
+                            ).then((_) {
+                    if (widget.fetchData != null) widget.fetchData!();
+                  }),
                           },
                       child: Icon(Icons.description, size: 24),
-                    ),
-                    SizedBox(height: 12),
-                    InkWell(
-                      onTap: () => {},
-                      child: Icon(Icons.upload, size: 24),
                     ),
                   ],
                 ),
@@ -111,13 +136,13 @@ class _JobCardState extends State<JobCard> {
                   onPressed: () {
                     showContactPopup(
                       context,
-                      widget.jobData.phoneNumber,
-                      widget.jobData,
+                      widget.custData.phoneNumber,
+                      widget.custData,
                     );
                   },
                   icon: const Icon(Icons.phone, color: Colors.blue),
                   label: Text(
-                    widget.jobData.phoneNumber ?? 'No Phone',
+                    widget.custData.phoneNumber ?? 'No Phone',
                     style: TextStyle(color: Colors.blue, fontSize: 14),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -126,27 +151,6 @@ class _JobCardState extends State<JobCard> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle_outline, size: 16),
-                      SizedBox(width: 4),
-                      Text(
-                        widget.jobData.status ?? 'PENDING',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ],
                   ),
                 ),
               ],
@@ -163,11 +167,11 @@ class _JobCardState extends State<JobCard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Created on ${widget.jobData.createdAt != null ? _dateFormat.format(DateTime.parse(widget.jobData.createdAt!)) : 'N/A'}",
+                  "Created on ${widget.custData.createdAt != null ? _dateFormat.format(DateTime.parse(widget.custData.createdAt!)) : 'N/A'}",
                   style: TextStyle(color: Colors.white, fontSize: 13),
                 ),
                 Text(
-                  "Total Amount: ₹ ${widget.jobData.totalAmount?.toStringAsFixed(2) ?? '0.00'}",
+                  "Total Amount: ₹ ${widget.custData.totalAmount?.toStringAsFixed(2) ?? '0.00'}",
                   style: TextStyle(color: Colors.white, fontSize: 13),
                 ),
               ],

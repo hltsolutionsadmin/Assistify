@@ -1,4 +1,5 @@
 import 'package:assistify/data/datasource/dashboard/user_profile_datasource.dart';
+import 'package:assistify/data/model/dash_board/edit_profile_model.dart';
 import 'package:assistify/data/model/dash_board/user_profile_model.dart';
 import 'package:assistify/domain/repo/dashboard/user_profile_repository.dart';
 
@@ -32,8 +33,18 @@ class UserProfileRepoImpl implements UserProfileRepository {
               updatedAt: model.data!.updatedAt,
               products: model.data!.products,
               bills: model.data!.bills,
+              categoryId: model.data!.categoryId,
             )
           : null,
+    );
+  }
+
+    @override
+  Future<EditProfileModel> edit_Profile(String customerId, dynamic body) async {
+    final model = await remoteDataSource.edit_Profile( customerId, body);
+    return EditProfileModel(
+      message: model.message,
+      status: model.status,  
     );
   }
 }
