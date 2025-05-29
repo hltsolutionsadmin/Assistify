@@ -17,8 +17,8 @@ import 'package:assistify/presentation/widgets/job_card_widget.dart';
 import 'package:assistify/presentation/widgets/logout_widget.dart';
 import 'package:assistify/presentation/widgets/vegi_customer_details_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -33,44 +33,37 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _refreshKey = GlobalKey<RefreshIndicatorState>();
   final _searchController = TextEditingController();
-  final _searchFocusNode = FocusNode();
-  TextEditingController nameController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  DateTime fromDate = DateTime.now();
-  DateTime toDate = DateTime.now();
-
+  ScrollController _scrollController = ScrollController();
   String userId = '';
   String companyId = '';
   String companyName = '';
-
   Map<String, dynamic>? filterData;
   num categoryId = 0;
-  String? selectedStatus;
-  final List<String> statusList = [
-    'Received',
-    'Assigned',
-    'In Progress',
-    'Estimated',
-    'Pending',
-    'Delivered',
-    'Completed',
-    'Paid',
-    "Return",
-  ];
+  int _pageNumber = 1;
+  final int _pageSize = 10;
+  bool _isFetchingMore = false;
+  bool _hasMore = true;
 
   @override
   void initState() {
     super.initState();
     _initializeData();
+    _checkForUpdate();
   }
 
-  @override
-  void dispose() {
-    // _searchController.dispose();
-    // _searchFocusNode.dispose();
-    super.dispose();
+  Future<void> _checkForUpdate() async {
+    try {
+      final updateInfo = await InAppUpdate.checkForUpdate();
+      if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+        if (updateInfo.immediateUpdateAllowed) {
+          await InAppUpdate.performImmediateUpdate();
+        } else if (updateInfo.flexibleUpdateAllowed) {
+          await InAppUpdate.startFlexibleUpdate();
+          await InAppUpdate.completeFlexibleUpdate();
+        }
+      }
+    } catch (_) {}
   }
-  // final ScrollController _scrollController = ScrollController();
 
   Future<void> _initializeData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -78,38 +71,51 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
     companyId = prefs.getString('companyId') ?? '';
     await _fetchUserProfile();
     _fetchAllBills();
-    if (mounted) {
-      _searchController.clear();
-    }
-
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   _searchFocusNode.requestFocus();
-    // });
+    if (mounted) _searchController.clear();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 100 &&
+          !_isFetchingMore &&
+          _hasMore) {
+        _pageNumber++;
+        _fetchAllBills();
+      }
+    });
   }
 
   Future<void> _fetchUserProfile() async {
     await context.read<UserProfileCubit>().userProfile(context, companyId);
-    final cubit = context.read<UserProfileCubit>();
-    final state = cubit.state;
-
+    final state = context.read<UserProfileCubit>().state;
     if (state is UserProfileLoaded) {
       companyName = state.userProfileModel.data?.name ?? 'No Name';
       categoryId = state.userProfileModel.data?.categoryId ?? 0;
-      print(
-        'companyId: $companyId , categoryId: $categoryId, companyName: $companyName',
-      );
-    } else if (state is UserProfileError) {
-      print('Error: ${state.message}');
     }
   }
 
-  void _fetchAllBills() {
-    context.read<AllBillsCubit>().all_bills(context, {
+  void _fetchAllBills() async {
+    _isFetchingMore = true;
+
+    await context.read<AllBillsCubit>().all_bills(context, {
       "userId": userId,
       "companyId": companyId,
-      "pageNumber": "1",
-      "pageSize": "40",
+      "pageNumber": _pageNumber.toString(),
+      "pageSize": _pageSize.toString(),
     });
+
+    _isFetchingMore = false;
+  }
+
+  Widget _buildDrawerItem(
+    IconData icon,
+    String title,
+    VoidCallback onTap, [
+    Color? iconColor,
+  ]) {
+    return ListTile(
+      leading: Icon(icon, color: iconColor ?? AppColor.blue),
+      title: Text(title, style: TextStyle(color: AppColor.black)),
+      onTap: onTap,
+    );
   }
 
   @override
@@ -128,9 +134,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
               child: BlocBuilder<UserProfileCubit, UserProfileState>(
                 builder: (context, state) {
                   if (state is UserProfileLoaded) {
-                    // final name = state.userProfileModel.data?.name;
                     return Text(
-                      companyName ?? '',
+                      companyName,
                       style: TextStyle(
                         color: AppColor.white,
                         fontSize: 24,
@@ -143,7 +148,6 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
               ),
             ),
             const SizedBox(height: 10),
-
             Expanded(
               child: FutureBuilder(
                 future: Future.delayed(const Duration(seconds: 2)),
@@ -156,39 +160,33 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   return ListView(
                     padding: EdgeInsets.zero,
                     children: [
-                      BuildDrawerItem(Icons.home, 'Home', () {
+                      _buildDrawerItem(Icons.home, 'Home', () {
                         Navigator.pop(context);
                         _fetchAllBills();
                       }),
-                      categoryId == 2
-                          ? SizedBox()
-                          : BuildDrawerItem(Icons.inventory, 'Inventory', () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => InventoryScreen(),
-                              ),
-                            );
-                          }),
-                      categoryId == 2
-                          ? SizedBox()
-                          : BuildDrawerItem(Icons.wallet, 'Expenses', () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ExpencesScreen(),
-                              ),
-                            );
-                          }),
-                      BuildDrawerItem(Icons.settings, 'Settings', () {
+                      if (categoryId != 2)
+                        _buildDrawerItem(Icons.inventory, 'Inventory', () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => InventoryScreen(),
+                            ),
+                          );
+                        }),
+                      if (categoryId != 2)
+                        _buildDrawerItem(Icons.wallet, 'Expenses', () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => ExpencesScreen()),
+                          );
+                        }),
+                      _buildDrawerItem(Icons.settings, 'Settings', () {
                         Navigator.pop(context);
                         final state = context.read<UserProfileCubit>().state;
-
                         if (state is UserProfileLoaded) {
                           final data = state.userProfileModel.data;
-
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -204,9 +202,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                                   ),
                             ),
                           ).then((result) {
-                            if (result == true) {
-                              _fetchUserProfile();
-                            }
+                            if (result == true) _fetchUserProfile();
                           });
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -216,24 +212,23 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                           );
                         }
                       }),
-                      BuildDrawerItem(Icons.person, 'Profile', () {
+                      _buildDrawerItem(Icons.person, 'Profile', () {
                         Navigator.pop(context);
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => ProfileScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const ProfileScreen(),
+                          ),
                         );
                       }),
-                      categoryId == 2
-                          ? SizedBox()
-                          : BuildDrawerItem(Icons.report, 'Reports', () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ReportsScreen(),
-                              ),
-                            );
-                          }),
+                      if (categoryId != 2)
+                        _buildDrawerItem(Icons.report, 'Reports', () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => ReportsScreen()),
+                          );
+                        }),
                     ],
                   );
                 },
@@ -241,14 +236,14 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child: BuildDrawerItem(Icons.logout, 'Logout', () {
+              child: _buildDrawerItem(Icons.logout, 'Logout', () {
                 showModalBottomSheet(
                   context: context,
                   builder: (_) => const LogOutCnfrmBottomSheet(),
                 );
               }, AppColor.red),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -261,7 +256,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
             if (state is UserProfileLoaded) {
               return Center(
                 child: Text(
-                  companyName ?? 'No Name',
+                  companyName,
                   style: TextStyle(color: AppColor.blue),
                 ),
               );
@@ -282,7 +277,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   context: context,
                   isScrollControlled: true,
                   builder:
-                      (context) => Container(
+                      (context) => SizedBox(
                         height: MediaQuery.of(context).size.height * 0.9,
                         child: FilterOptionsView(
                           companyId: companyId,
@@ -295,12 +290,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                         ),
                       ),
                 );
-
-                if (result != null) {
-                  setState(() {
-                    filterData = result;
-                  });
-                }
+                if (result != null) setState(() => filterData = result);
               },
               child: Container(
                 margin: const EdgeInsets.all(8),
@@ -334,10 +324,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                           )
                           : AddJobFormScreen(companyName: companyName),
             ),
-          ).then((_) {
-            _fetchAllBills();
-          });
-          ;
+          ).then((_) => _fetchAllBills());
         },
         backgroundColor: AppColor.blue,
         child: Icon(Icons.add, color: AppColor.white),
@@ -345,10 +332,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
       body: RefreshIndicator(
         color: AppColor.blue,
         key: _refreshKey,
-        onRefresh: () async {
-          _fetchAllBills();
-          // _fetchUserProfile();
-        },
+        onRefresh: () async => _fetchAllBills(),
         child: BlocBuilder<AllBillsCubit, AllBillsState>(
           builder: (context, state) {
             return Column(
@@ -412,8 +396,9 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                                       ),
                         );
                       } else if (state is AllBillsLoaded) {
-                        final bills = state.allBillsModel.data?.bills;
-                        if (bills == null || bills.isEmpty) {
+                        final bills = state.allBillsModel.data?.bills ?? [];
+
+                        if (bills.isEmpty) {
                           return Center(
                             child: Text(
                               "No bills available",
@@ -425,24 +410,38 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                             ),
                           );
                         }
+
                         return ListView.builder(
-                          itemCount: bills.length,
-                          itemBuilder:
-                              (_, i) =>
-                                  categoryId == 2
-                                      ? VegiCustomerDetailsCard(
-                                        custData: bills[i],
-                                        fetchData: _fetchAllBills,
-                                        companyName: companyName,
-                                        category: categoryId,
-                                      )
-                                      : JobCard(
-                                        jobData: bills[i],
-                                        companyName: companyName,
-                                        fetchData: _fetchAllBills,
-                                      ),
+                          controller: _scrollController,
+                          itemCount: bills.length + 1, // Add 1 for loader
+                          itemBuilder: (_, i) {
+                            if (i < bills.length) {
+                              return categoryId == 2
+                                  ? VegiCustomerDetailsCard(
+                                    custData: bills[i],
+                                    fetchData: _fetchAllBills,
+                                    companyName: companyName,
+                                    category: categoryId,
+                                  )
+                                  : JobCard(
+                                    jobData: bills[i],
+                                    companyName: companyName,
+                                    fetchData: _fetchAllBills,
+                                  );
+                            } else {
+                              return _hasMore
+                                  ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Center(
+                                      child: CupertinoActivityIndicator(color: Colors.blue),
+                                    ),
+                                  )
+                                  : const SizedBox.shrink();
+                            }
+                          },
                         );
                       }
+
                       return const Center(
                         child: CupertinoActivityIndicator(color: Colors.blue),
                       );

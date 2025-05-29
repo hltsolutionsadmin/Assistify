@@ -29,6 +29,7 @@ dependencies:
   fl_chart: ^1.0.0
   flutter_bluetooth_printer: ^2.17.1
   image_picker: ^1.0.4
+  in_app_update: ^4.1.4
 
 
 dev_dependencies:
