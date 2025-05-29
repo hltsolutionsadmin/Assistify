@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:assistify/core/constants/custome_snack_bar.dart';
+import 'package:assistify/data/model/dash_board/all_bills_model.dart';
 import 'package:assistify/domain/usecase/dashboard/all_bills_usecase.dart';
 import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_state.dart';
 import 'package:bloc/bloc.dart';
@@ -15,34 +16,43 @@ class AllBillsCubit extends Cubit<AllBillsState> {
   AllBillsCubit({required this.useCase, required this.networkService})
     : super(AllBillsInitial());
 
+List<Bills>? _allBills = [];
     
 
-  Future<void> all_bills(
-    BuildContext context,
-  dynamic body,
-  ) async {
-    bool isConnected = await networkService.hasInternetConnection();
-    if (!isConnected) {
-      print("No Internet Connection");
-      CustomSnackbars.showErrorSnack(
-        context: context,
-        title: 'Alert',
-        message: 'Please check Internet Connection',
-      );
-      return;
-    }
-    try {
-      emit(AllBillsLoading());
-      final allBillsEntity = await useCase.call(body);
-      print(allBillsEntity);
-      if (allBillsEntity.status == 'SUCCESS') {
-        emit(AllBillsLoaded(allBillsEntity));
-      }
-    } catch (e) {
-      print('error in allbills: $e');
-      emit(AllBillsError('Failed to load all BillsEntity data: ${e.toString()}'));
-    }
+  Future<void> all_bills(BuildContext context, dynamic body) async {
+  bool isConnected = await networkService.hasInternetConnection();
+  if (!isConnected) {
+    CustomSnackbars.showErrorSnack(
+      context: context,
+      title: 'Alert',
+      message: 'Please check Internet Connection',
+    );
+    return;
   }
+
+  try {
+    if (body["pageNumber"] == "1") {
+      _allBills = []; // Reset if first page
+      emit(AllBillsLoading());
+    }
+
+    final allBillsEntity = await useCase.call(body);
+
+    if (allBillsEntity.status == 'SUCCESS') {
+      final newBills = allBillsEntity.data?.bills ?? [];
+      _allBills!.addAll(newBills);
+      emit(AllBillsLoaded(
+        AllBillsModel(
+            status: allBillsEntity.status,
+            message: allBillsEntity.message,
+          data: Data(bills: _allBills),
+        ),
+      ));
+    }
+  } catch (e) {
+    emit(AllBillsError('Failed to load bills: ${e.toString()}'));
+  }
+}
   
   
   Future<void> searchBills({

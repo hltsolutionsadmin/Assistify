@@ -8,18 +8,14 @@ class AllBillsInitial extends AllBillsState {}
 class SearchBillsInitial extends AllBillsState {}
 class SpareBillsInitial extends AllBillsState {}
 
-
-
 class AllBillsLoading extends AllBillsState {}
 class SearchBillsLoading extends AllBillsState {}
 class SpareBillsLoading extends AllBillsState {}
-
 
 class AllBillsLoaded extends AllBillsState {
   final AllBillsModel allBillsModel;
   AllBillsLoaded(this.allBillsModel);
 }
-
 
 class SearchBillsLoaded extends AllBillsState {
   final SearchBillModel searchBillModel;
@@ -30,7 +26,6 @@ class SpareBillsLoaded extends AllBillsState {
   final BillSparesModel billSparesModel;
   SpareBillsLoaded(this.billSparesModel);
 }
-
 
 class AllBillsError extends AllBillsState {
   final String message;
