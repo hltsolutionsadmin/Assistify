@@ -66,10 +66,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
       errorName = _productNameController.text.isEmpty;
       errorPrice = _productPriceController.text.isEmpty;
       errorQuantity = _productQuantityController.text.isEmpty;
-      errorDescription = _productDescriptionController.text.isEmpty;
     });
 
-    if (errorName || errorPrice || errorQuantity || errorDescription) {
+    if (errorName || errorPrice || errorQuantity) {
       setState(() => isLoading = false);
       return;
     }
@@ -144,7 +143,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               customTextField(
                 _productDescriptionController,
                 'Description',
-                errorText: errorDescription ? 'Please enter a description' : null,
+                // errorText: errorDescription ? 'Please enter a description' : null,
                 onChanged: (value) => setState(() => errorDescription = value.isEmpty),
               ),
               const SizedBox(height: 20),

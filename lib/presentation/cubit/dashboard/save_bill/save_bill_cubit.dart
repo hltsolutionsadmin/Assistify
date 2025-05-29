@@ -14,8 +14,14 @@ class SaveBillCubit extends Cubit<SaveBillState> {
   SaveBillCubit({required this.useCase, required this.networkService})
     : super(SaveBillInitial());
 
-  Future<void> save_bill(BuildContext context, dynamic body, String companyName) async {
+  Future<void> save_bill(
+    BuildContext context,
+    dynamic body,
+    String companyName,
+    num? category,
+  ) async {
     print(body);
+    print(category);
     bool isConnected = await networkService.hasInternetConnection();
     print(isConnected);
     if (!isConnected) {
@@ -33,7 +39,7 @@ class SaveBillCubit extends Cubit<SaveBillState> {
       print(saveBillEntity);
       if (saveBillEntity.status == 'SUCCESS') {
         Navigator.pop(context);
-        _launchWhatsApp(context, body, companyName);
+        _launchWhatsApp(context, body, companyName, category);
         emit(SaveBillLoaded(saveBillEntity));
       } else {
         CustomSnackbars.showErrorSnack(
@@ -43,19 +49,25 @@ class SaveBillCubit extends Cubit<SaveBillState> {
         );
       }
     } catch (e) {
+      CustomSnackbars.showErrorSnack(
+        context: context,
+        title: 'Alert',
+        message: 'some thing went wrong',
+      );
       print('error in allbills: $e');
       emit(SaveBillError('Failed to load save bill data: ${e.toString()}'));
     }
   }
 
-  Future<void> _launchWhatsApp(context, body, companyName) async {
+  Future<void> _launchWhatsApp(context, body, companyName, category) async {
     String phone = body['phoneNumber'] ?? '';
-    String sanitizedPhone = phone.replaceAll(RegExp(r'[^0-9+]'), '');
-    if (sanitizedPhone.startsWith('+')) {
-      sanitizedPhone = sanitizedPhone.substring(1);
-    }
+    print('phone: $phone');
+    // String sanitizedPhone = phone.replaceAll(RegExp(r'[^0-9+]'), '');
+    // if (sanitizedPhone.startsWith('+')) {
+    //   sanitizedPhone = sanitizedPhone.substring(1);
+    // }
 
-    String message = ''' 
+    String message1 = ''' 
 Hello *${body['customerName']}*
 Please find the requested details:
 Product: *${body['productName']}*(${body['modelNumber']}, ${body['serialNumber']})
@@ -67,9 +79,28 @@ Thanks & Regards
 *${companyName}*
 *$phone*
     ''';
+    String itemDetails = '';
+    if (body['billSpares'] != null) {
+      for (var spare in body['billSpares']) {
+        itemDetails += '${spare['product']} - ${spare['quantity']}kg\n';
+      }
+    }
+
+    String message2 = ''' 
+Hello *${body['customerName']}*
+Please find the requested details:
+
+Item details
+$itemDetails
+TotalAmount: ₹${body['totalAmount']}
+
+Thanks & Regards
+*${companyName}*
+*$phone*
+    ''';
 
     final url =
-        'https://wa.me/$sanitizedPhone?text=${Uri.encodeComponent(message)}';
+        'https://wa.me/+91$phone?text=${Uri.encodeComponent(category == 2 ? message2 : message1)}';
 
     final uri = Uri.parse(url);
 

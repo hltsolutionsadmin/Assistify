@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class LogOutCnfrmBottomSheet extends StatelessWidget {
   const LogOutCnfrmBottomSheet({super.key});
 
@@ -17,23 +16,20 @@ class LogOutCnfrmBottomSheet extends StatelessWidget {
         width: getWidth(context),
         height: getHeight(context) * 0.234,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 37,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 37),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
                 'Are You sure want to log out',
                 style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Poppins',
-                    color: AppColor.black),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Poppins',
+                  color: AppColor.black,
+                ),
               ),
-              const SizedBox(
-                height: 5,
-              ),
+              const SizedBox(height: 5),
               const Spacer(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -43,7 +39,11 @@ class LogOutCnfrmBottomSheet extends StatelessWidget {
                       SharedPreferences prefs;
                       prefs = await SharedPreferences.getInstance();
                       prefs.setString('TOKEN', '');
-
+                      prefs.setString("email", '');
+                      prefs.setString("userId", '');
+                      prefs.setString("companyId", '');
+                      prefs.setString("firstName", '');
+                      prefs.setString("lastName", '');
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -51,17 +51,20 @@ class LogOutCnfrmBottomSheet extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColor.blue,
-                        fixedSize: Size(getWidth(context) * 0.4, 43),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6))),
+                      backgroundColor: AppColor.blue,
+                      fixedSize: Size(getWidth(context) * 0.4, 43),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
                     child: Text(
                       'Yes',
                       style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Poppins',
-                          color: AppColor.white),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Poppins',
+                        color: AppColor.white,
+                      ),
                     ),
                   ),
                   ElevatedButton(
@@ -69,17 +72,20 @@ class LogOutCnfrmBottomSheet extends StatelessWidget {
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColor.black,
-                        fixedSize: Size(getWidth(context) * 0.4, 43),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6))),
+                      backgroundColor: AppColor.black,
+                      fixedSize: Size(getWidth(context) * 0.4, 43),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
                     child: Text(
                       'No',
                       style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Poppins',
-                          color: AppColor.white),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Poppins',
+                        color: AppColor.white,
+                      ),
                     ),
                   ),
                 ],

@@ -1,5 +1,6 @@
 import 'package:assistify/components/custome_text_field.dart';
 import 'package:assistify/core/constants/colors.dart';
+import 'package:assistify/core/constants/custome_snack_bar.dart';
 import 'package:assistify/core/constants/imgs_const.dart';
 import 'package:assistify/core/constants/sizes.dart';
 import 'package:assistify/core/injection.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -27,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen>
   bool forgotPassword = false;
   bool isFormValid = false;
   bool isLoading = false;
+  bool isSubmitted = false;
 
   @override
   void initState() {
@@ -40,47 +41,79 @@ class _LoginScreenState extends State<LoginScreen>
     passwordController.addListener(_validateForm);
   }
 
-  void _validateForm() {
-    setState(() {
-      if (forgotPassword) {
-        isFormValid = emailController.text.isNotEmpty;
-        errorEmail = emailController.text.isEmpty;
-      } else {
-        errorEmail = emailController.text.isEmpty;
-        errorPassword = passwordController.text.isEmpty;
-        isFormValid = !errorEmail && !errorPassword;
-      }
-    });
-  }
+ void _validateForm() {
+  setState(() {
+    final emailText = emailController.text.trim();
+    final passwordText = passwordController.text;
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final isEmailValid = emailRegex.hasMatch(emailText);
+
+    if (forgotPassword) {
+      errorEmail = isSubmitted && (emailText.isEmpty || !isEmailValid);
+      isFormValid = emailText.isNotEmpty && isEmailValid;
+    } else {
+      errorEmail = isSubmitted && (emailText.isEmpty || !isEmailValid);
+      errorPassword = isSubmitted && passwordText.isEmpty;
+
+      isFormValid = !errorEmail && !errorPassword;
+    }
+  });
+}
+
 
   void _handleSubmit() async {
-    _validateForm();
-    if (!isFormValid) return;
-    setState(() {
-      isLoading = true;
-    });
+  final email = emailController.text.trim();
+  final password = passwordController.text;
 
-    try {
-      if (forgotPassword) {
-        final forgotPasswordCubit = context.read<ForgotPasswordCubit>();
-        await forgotPasswordCubit.forgotPassword(
-          context,
-          emailController.text,
-        );
-      } else {
-        final login = context.read<LoginCubit>();
-        await login.logIn(
-          context,
-          emailController.text,
-          passwordController.text,
-        );
-      }
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+  // Email validation regex
+  final emailRegex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+
+  // Check if email is empty or invalid
+  if (email.isEmpty || !emailRegex.hasMatch(email)) {
+    setState(() {
+      errorEmail = true;
+    });
+    return;
   }
+
+  setState(() {
+    errorEmail = false;
+    isSubmitted = true;
+  });
+
+  _validateForm();
+
+  if (!isFormValid) return;
+
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    if (forgotPassword) {
+      final forgotPasswordCubit = context.read<ForgotPasswordCubit>();
+      await forgotPasswordCubit.forgotPassword(context, email);
+      CustomSnackbars.showSuccessSnack(
+        context: context,
+        title: 'Success',
+        message: 'Please check your email for the reset link.',
+      );
+      setState(() {
+        forgotPassword = false;
+        isSubmitted = false;
+        passwordController.clear();
+      });
+    } else {
+      final login = context.read<LoginCubit>();
+      await login.logIn(context, email, password);
+    }
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
+  }
+}
+
 
   @override
   void dispose() {
@@ -110,17 +143,19 @@ class _LoginScreenState extends State<LoginScreen>
                     customTextField(
                       emailController,
                       forgotPassword ? 'Forgot Password' : 'Email',
-                      errorText: errorEmail ? 'Please enter email' : null,
+                      errorText:  errorEmail  ? 'Please enter valid E-Mail' : null,
                       onChanged: (value) {
                         _validateForm();
                       },
                     ),
+
                     if (!forgotPassword)
                       customTextField(
                         passwordController,
                         'Password',
                         obscureText: true,
-                        errorText: errorPassword ? 'Please enter Password' : null,
+                        errorText:
+                            errorPassword ? 'Please enter Password' : null,
                         onChanged: (value) {
                           _validateForm();
                         },
@@ -144,6 +179,7 @@ class _LoginScreenState extends State<LoginScreen>
                       onTap: () {
                         setState(() {
                           forgotPassword = !forgotPassword;
+                          isSubmitted = false;
                           _validateForm();
                         });
                       },

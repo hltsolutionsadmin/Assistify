@@ -22,8 +22,6 @@ class AllBillsCubit extends Cubit<AllBillsState> {
   dynamic body,
   ) async {
     bool isConnected = await networkService.hasInternetConnection();
-    print(isConnected);
-
     if (!isConnected) {
       print("No Internet Connection");
       CustomSnackbars.showErrorSnack(

@@ -24,7 +24,7 @@ class AllBillsModel {
 
 class Data {
   List<Bills>? bills;
-  int? totalRecords;
+  num? totalRecords;
 
   Data({this.bills, this.totalRecords});
 

@@ -10,6 +10,7 @@ Widget customTextField(
   bool obscureText = false,
   bool enabled = true,
   bool readOnly = false,
+  Icon? prefixIcon,
   List<TextInputFormatter>? inputFormatters,
 }) {
   return Padding(
@@ -22,11 +23,9 @@ Widget customTextField(
       readOnly: readOnly,
       obscureText: obscureText ? true : false,
       decoration: InputDecoration(
+        prefixIcon: prefixIcon,
         labelText: label,
-        labelStyle: TextStyle(
-          color:  AppColor.black,
-          fontSize: 14,
-        ),
+        labelStyle: TextStyle(color: AppColor.black, fontSize: 14),
         focusColor: AppColor.blue,
         contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         border: OutlineInputBorder(

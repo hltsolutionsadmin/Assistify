@@ -9,6 +9,7 @@ import 'package:assistify/data/datasource/dashboard/save_bill_datasource.dart';
 import 'package:assistify/data/datasource/dashboard/user_profile_datasource.dart';
 import 'package:assistify/data/datasource/forgot_password/forgot_password_datasource.dart';
 import 'package:assistify/data/datasource/login/login_datasource.dart';
+import 'package:assistify/data/datasource/search_pnone_number/search_phone_number_datasource.dart';
 import 'package:assistify/data/repoimpl/add_expences/add_expences_repo_impl.dart';
 import 'package:assistify/data/repoimpl/add_products/add_products_repo_impl.dart';
 import 'package:assistify/data/repoimpl/dashboard/all_bills_repo_impl.dart';
@@ -18,6 +19,7 @@ import 'package:assistify/data/repoimpl/dashboard/save_bill_repo_impl.dart';
 import 'package:assistify/data/repoimpl/dashboard/user_profile_repo_impl.dart';
 import 'package:assistify/data/repoimpl/forgot_password/forgot_password_repo_impl.dart';
 import 'package:assistify/data/repoimpl/login/login_repo_impl.dart';
+import 'package:assistify/data/repoimpl/search_mobile_number/search_phone_number_repo_impl.dart';
 import 'package:assistify/domain/repo/add_expences/add_expences_repository.dart';
 import 'package:assistify/domain/repo/add_products/add_products_repository.dart';
 import 'package:assistify/domain/repo/dashboard/all_bills_repository.dart';
@@ -27,6 +29,7 @@ import 'package:assistify/domain/repo/dashboard/save_bill_repository.dart';
 import 'package:assistify/domain/repo/dashboard/user_profile_repository.dart';
 import 'package:assistify/domain/repo/forgot_password/forgot_password_repositort.dart';
 import 'package:assistify/domain/repo/login/login_repository.dart';
+import 'package:assistify/domain/repo/search_phone_number/search_phone_numeber_repository.dart';
 import 'package:assistify/domain/usecase/add_expences/add_expences_useCase.dart';
 import 'package:assistify/domain/usecase/add_products/add_products_useCase.dart';
 import 'package:assistify/domain/usecase/dashboard/all_bills_usecase.dart';
@@ -36,6 +39,7 @@ import 'package:assistify/domain/usecase/dashboard/save_bill_usecase.dart';
 import 'package:assistify/domain/usecase/dashboard/user_profile_usecase.dart';
 import 'package:assistify/domain/usecase/forgot_password/forgot_password_usecase.dart';
 import 'package:assistify/domain/usecase/login/login_usecase.dart';
+import 'package:assistify/domain/usecase/search_phone_number/search_phone_number_usecase.dart';
 import 'package:assistify/presentation/cubit/add_expences/add_expences_cubit.dart';
 import 'package:assistify/presentation/cubit/add_products/add_products_cubit.dart';
 import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_cubit.dart';
@@ -45,6 +49,7 @@ import 'package:assistify/presentation/cubit/dashboard/save_bill/save_bill_cubit
 import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_cubit.dart';
 import 'package:assistify/presentation/cubit/forgot_password/forgot_password_cubit.dart';
 import 'package:assistify/presentation/cubit/login/logIn_cubit.dart';
+import 'package:assistify/presentation/cubit/search_phone_number/search_phone_number_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -181,4 +186,18 @@ void init(){
     () => UserProfileUsecase(repository: sl<UserProfileRepository>()),
   );
   sl.registerFactory(() => UserProfileCubit(useCase: sl<UserProfileUsecase>(), networkService: NetworkService()));
+
+
+  //SEARCH PHONE NUMBER
+
+  sl.registerLazySingleton<SearchPhoneNumberDatasource>(
+    () => SearchPhoneNumberDataSourceImpl(client: sl<DioClient>().dio),
+  );
+  sl.registerLazySingleton<SearchPhoneNumeberRepository>(
+    () => SearchMobileNumberRepoImpl(remoteDataSource: sl<SearchPhoneNumberDatasource>()),
+  );
+  sl.registerLazySingleton(
+    () => SearchPhoneNumberUsecase(repository: sl<SearchPhoneNumeberRepository>()),
+  );
+  sl.registerFactory(() => SearchPhoneNumberCubit(useCase: sl<SearchPhoneNumberUsecase>(), networkService: NetworkService()));
 }

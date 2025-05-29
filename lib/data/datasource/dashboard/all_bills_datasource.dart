@@ -50,7 +50,7 @@ class AllBillsDataSourceImpl implements AllBillsDatasource {
     print('$jobId, $userId, $companyId');
     try {
       final response = await client.get(
-        '$searchBills?id=$jobId&userId=$userId&companyId=$companyId',
+        '$searchBills?searchKey=$jobId&userId=$userId&companyId=$companyId',
       );
       print('Response status code of search bills: ${response.statusCode}');
       if (response.statusCode == 200) {

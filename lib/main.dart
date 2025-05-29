@@ -8,6 +8,7 @@ import 'package:assistify/presentation/cubit/dashboard/save_bill/save_bill_cubit
 import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_cubit.dart';
 import 'package:assistify/presentation/cubit/forgot_password/forgot_password_cubit.dart';
 import 'package:assistify/presentation/cubit/login/logIn_cubit.dart';
+import 'package:assistify/presentation/cubit/search_phone_number/search_phone_number_cubit.dart';
 import 'package:assistify/presentation/screen/splash/splash_screen.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => di.sl<SaveBillCubit>()),
         BlocProvider(create: (_) => di.sl<AddExpencesCubit>()),
         BlocProvider(create: (_) => di.sl<UserProfileCubit>()),
+        BlocProvider(create: (_) => di.sl<SearchPhoneNumberCubit>()),
       ],
       child: MaterialApp(
         title: 'Assitify',

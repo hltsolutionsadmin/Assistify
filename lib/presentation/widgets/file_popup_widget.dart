@@ -1,6 +1,13 @@
 import 'package:assistify/presentation/widgets/printing_screen_widget.dart';
 import 'package:flutter/material.dart';
-void showFilePopup(BuildContext context, dynamic data, Function? fetchData) {
+
+void showFilePopup(
+  BuildContext context,
+  dynamic data,
+  Function? fetchData,
+  num? category,
+  String? companyName,
+) {
   showDialog(
     context: context,
     builder: (context) {
@@ -17,10 +24,13 @@ void showFilePopup(BuildContext context, dynamic data, Function? fetchData) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PrintingCard(
-                        title: 'Bill',
-                         data: data,
-                      ),
+                      builder:
+                          (context) => PrintingCard(
+                            title: 'Bill',
+                            data: data,
+                            category: category,
+                            companyName: companyName,
+                          ),
                     ),
                   ).then((_) {
                     if (fetchData != null) fetchData();
@@ -41,12 +51,17 @@ void showFilePopup(BuildContext context, dynamic data, Function? fetchData) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PrintingCard(
-                        title: 'Invoice',
-                        data: data,
-                      ),
+                      builder:
+                          (context) => PrintingCard(
+                            title: 'Invoice',
+                            data: data,
+                            category: category,
+                            companyName: companyName,
+                          ),
                     ),
-                  );
+                  ).then((_) {
+                    if (fetchData != null) fetchData();
+                  });
                 },
                 child: Row(
                   children: [
@@ -63,12 +78,17 @@ void showFilePopup(BuildContext context, dynamic data, Function? fetchData) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PrintingCard(
-                        title: 'Estimation',
-                         data: data,
-                      ),
+                      builder:
+                          (context) => PrintingCard(
+                            title: 'Estimation',
+                            data: data,
+                            category: category,
+                            companyName: companyName,
+                          ),
                     ),
-                  );
+                  ).then((_) {
+                    if (fetchData != null) fetchData();
+                  });
                 },
                 child: Row(
                   children: [

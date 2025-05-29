@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void showContactPopup(BuildContext context, String phoneNumber, dynamic data) {
-
   void _makePhoneCall(String phoneNumber) async {
     print("Phone Number: $phoneNumber");
     final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
@@ -25,16 +24,7 @@ void showContactPopup(BuildContext context, String phoneNumber, dynamic data) {
     }
 
     String message = ''' 
-Hello *Anil*
-Please find the requested details:
-Product: *${data.productName}*(${data.modelNumber}, ${data.serialNumber})
-Order/Complaint: *${data.complaint}*
-Job/OrderId: *${data.jobId}*
-Status: *${data.status}*
-
-Thanks & Regards
-*JRServices*
-*$phone*
+    Hello *${data.customerName}*
     ''';
 
     final url =

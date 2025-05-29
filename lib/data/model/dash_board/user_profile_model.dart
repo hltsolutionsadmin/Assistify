@@ -32,11 +32,12 @@ class Data {
   String? bannerImage;
   num? initialJOBID;
   Null? registeredIdentity;
-  Null? termsAndConditions;
-  Null? category;
-  Null? jobIdFormat;
+  String? termsAndConditions;
+  num? category;
+  String? jobIdFormat;
   String? validityDate;
   String? createdAt;
+  num? categoryId;
   String? updatedAt;
   Null? products;
   Null? bills;
@@ -56,6 +57,7 @@ class Data {
       this.jobIdFormat,
       this.validityDate,
       this.createdAt,
+      this.categoryId,
       this.updatedAt,
       this.products,
       this.bills});
@@ -72,6 +74,7 @@ class Data {
     registeredIdentity = json['registeredIdentity'];
     termsAndConditions = json['termsAndConditions'];
     category = json['category'];
+    categoryId = json['categoryId'];
     jobIdFormat = json['jobIdFormat'];
     validityDate = json['validityDate'];
     createdAt = json['createdAt'];
@@ -96,6 +99,7 @@ class Data {
     data['jobIdFormat'] = this.jobIdFormat;
     data['validityDate'] = this.validityDate;
     data['createdAt'] = this.createdAt;
+    data['categoryId'] = this.categoryId;
     data['updatedAt'] = this.updatedAt;
     data['products'] = this.products;
     data['bills'] = this.bills;
