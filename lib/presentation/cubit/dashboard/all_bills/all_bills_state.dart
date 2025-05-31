@@ -7,10 +7,13 @@ abstract class AllBillsState {}
 class AllBillsInitial extends AllBillsState {}
 class SearchBillsInitial extends AllBillsState {}
 class SpareBillsInitial extends AllBillsState {}
+class FilterBillsInitial extends AllBillsState {}
 
 class AllBillsLoading extends AllBillsState {}
 class SearchBillsLoading extends AllBillsState {}
 class SpareBillsLoading extends AllBillsState {}
+class FilterBillsLoading extends AllBillsState {}
+
 
 class AllBillsLoaded extends AllBillsState {
   final AllBillsModel allBillsModel;
@@ -26,6 +29,10 @@ class SpareBillsLoaded extends AllBillsState {
   final BillSparesModel billSparesModel;
   SpareBillsLoaded(this.billSparesModel);
 }
+class FilterBillsLoaded extends AllBillsState {
+  final AllBillsModel allBillsModel;
+FilterBillsLoaded(this.allBillsModel);
+}
 
 class AllBillsError extends AllBillsState {
   final String message;
@@ -40,4 +47,8 @@ class SearchBillsError extends AllBillsState {
 class SpareBillsError extends AllBillsState {
   final String message;
  SpareBillsError(this.message);
+}
+class FilterBillsError extends AllBillsState {
+  final String message;
+ FilterBillsError(this.message);
 }

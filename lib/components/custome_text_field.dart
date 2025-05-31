@@ -26,7 +26,7 @@ Widget customTextField(
         prefixIcon: prefixIcon,
         labelText: label,
         labelStyle: TextStyle(color: AppColor.black, fontSize: 14),
-        focusColor: AppColor.blue,
+        // focusColor: AppColor.blue,
         contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         border: OutlineInputBorder(
           borderSide: BorderSide(color: AppColor.gray),
