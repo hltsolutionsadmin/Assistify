@@ -14,6 +14,8 @@ class SpareBox extends StatefulWidget {
   final VoidCallback onSelectProductTap;
   final String? selectedProduct;
   final bool showOtherItemsFields;
+  final int maxQuantity;
+  final String? prodId;
 
   const SpareBox({
     Key? key,
@@ -27,6 +29,8 @@ class SpareBox extends StatefulWidget {
     required this.onSelectProductTap,
     this.selectedProduct,
     required this.showOtherItemsFields,
+    required this.maxQuantity,
+    this.prodId,
   }) : super(key: key);
 
   @override
@@ -42,84 +46,82 @@ class _SpareBoxState extends State<SpareBox> {
   @override
   void initState() {
     super.initState();
-    _initializeControllers();
-  }
-
-  void _initializeControllers() {
-    _nameController = TextEditingController(text: widget.spareBox['name'] ?? '');
-    _descriptionController = TextEditingController(text: widget.spareBox['description'] ?? '');
+    _nameController = TextEditingController(
+      text: widget.spareBox['name'] ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.spareBox['description'] ?? '',
+    );
     _quantityController = TextEditingController(
-      text: widget.spareBox['quantity'] == 0 ? '' : widget.spareBox['quantity'].toString(),
+      text:
+          (widget.spareBox['quantity'] == null ||
+                  widget.spareBox['quantity'] == 0)
+              ? ''
+              : widget.spareBox['quantity'].toString(),
     );
     _priceController = TextEditingController(
-      text: widget.spareBox['price'] == 0.0 ? '' : widget.spareBox['price'].toString(),
-    );
-  }
-
-  void _updateControllers(SpareBox oldWidget) {
-    if (widget.spareBox['name'] != oldWidget.spareBox['name']) {
-      _nameController.text = widget.spareBox['name'] ?? '';
-    }
-    if (widget.spareBox['description'] != oldWidget.spareBox['description']) {
-      _descriptionController.text = widget.spareBox['description'] ?? '';
-    }
-    _updateNumericController(
-      oldValue: oldWidget.spareBox['quantity'],
-      newValue: widget.spareBox['quantity'],
-      controller: _quantityController,
-      isPrice: false,
-    );
-    _updateNumericController(
-      oldValue: oldWidget.spareBox['price'],
-      newValue: widget.spareBox['price'],
-      controller: _priceController,
-      isPrice: true,
-    );
-  }
-
-  void _updateNumericController({
-    required dynamic oldValue,
-    required dynamic newValue,
-    required TextEditingController controller,
-    required bool isPrice,
-  }) {
-    if (oldValue != newValue) {
-      final compareValue = isPrice ? 0.0 : 0;
-      final newText = newValue == compareValue ? '' : newValue.toString();
-      if (controller.text != newText) {
-        controller.text = newText;
-      }
-    }
-  }
-
-  InputDecoration _buildInputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle:  TextStyle(
-        color: AppColor.black,
-        fontSize: 14,
-      ),
-      focusColor: AppColor.blue,
-      border:  OutlineInputBorder(
-        borderSide: BorderSide(color: AppColor.gray),
-      ),
-      enabledBorder:  OutlineInputBorder(
-        borderSide: BorderSide(color: AppColor.gray),
-      ),
-      focusedBorder:  OutlineInputBorder(
-        borderSide: BorderSide(
-          color: AppColor.blue,
-          width: 2,
-        ),
-      ),
+      text:
+          (widget.spareBox['price'] == null || widget.spareBox['price'] == 0.0)
+              ? ''
+              : widget.spareBox['price'].toString(),
     );
   }
 
   @override
-  void didUpdateWidget(SpareBox oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateControllers(oldWidget);
+void didUpdateWidget(covariant SpareBox oldWidget) {
+  print(widget.spareBox['name']);
+  super.didUpdateWidget(oldWidget);
+
+  _conditionallyUpdateControllerText(
+    _nameController,
+    widget.spareBox['name'] == 'Others Items' ? '' : widget.spareBox['name']  ?? '',
+  );
+
+  _conditionallyUpdateControllerText(
+    _descriptionController,
+    widget.spareBox['description'] ?? '',
+  );
+
+  _conditionallyUpdateControllerText(
+    _quantityController,
+    (widget.spareBox['quantity'] == null || widget.spareBox['quantity'] == 0)
+        ? ''
+        : widget.spareBox['quantity'].toString(),
+  );
+
+  _conditionallyUpdateControllerText(
+    _priceController,
+    (widget.spareBox['price'] == null || widget.spareBox['price'] == 0.0)
+        ? ''
+        : widget.spareBox['price'].toString(),
+  );
+}
+
+
+void _conditionallyUpdateControllerText(TextEditingController controller, String newText) {
+  if (controller.text != newText) {
+    final cursorPosition = controller.selection.baseOffset;
+    controller.text = newText;
+    if (cursorPosition >= 0 && cursorPosition <= newText.length) {
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: cursorPosition),
+      );
+    }
   }
+}
+
+  InputDecoration _buildInputDecoration(String label) => InputDecoration(
+    labelText: label,
+    labelStyle: TextStyle(color: AppColor.black, fontSize: 14),
+    focusColor: AppColor.blue,
+    border: OutlineInputBorder(borderSide: BorderSide(color: AppColor.gray)),
+    enabledBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColor.gray),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColor.blue, width: 2),
+    ),
+  );
 
   @override
   void dispose() {
@@ -132,8 +134,8 @@ class _SpareBoxState extends State<SpareBox> {
 
   @override
   Widget build(BuildContext context) {
-    final double amount = (widget.spareBox['quantity'] ?? 0) * (widget.spareBox['price'] ?? 0.0);
-    
+    final double amount =
+        (widget.spareBox['quantity'] ?? 0) * (widget.spareBox['price'] ?? 0.0);
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 16),
@@ -145,7 +147,7 @@ class _SpareBoxState extends State<SpareBox> {
             Align(
               alignment: Alignment.centerRight,
               child: IconButton(
-                icon:  Icon(Icons.cancel, color: AppColor.red),
+                icon: Icon(Icons.cancel, color: AppColor.red),
                 onPressed: widget.onDelete,
               ),
             ),
@@ -161,10 +163,7 @@ class _SpareBoxState extends State<SpareBox> {
                   Expanded(
                     child: TextField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: _buildInputDecoration('Name'),
                       onChanged: widget.onNameChanged,
                     ),
                   ),
@@ -172,10 +171,7 @@ class _SpareBoxState extends State<SpareBox> {
                   Expanded(
                     child: TextField(
                       controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: _buildInputDecoration('Description'),
                       onChanged: widget.onDescriptionChanged,
                     ),
                   ),
@@ -186,34 +182,67 @@ class _SpareBoxState extends State<SpareBox> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: TextFormField(
                     controller: _quantityController,
-                    decoration: _buildInputDecoration('Quantity'),
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    onChanged: widget.onQuantityChanged,
+                    onChanged: (value) {
+                      if (widget.selectedProduct == 'Others Items') {
+                        widget.onQuantityChanged(value);
+                      } else {
+                        final parsed = int.tryParse(value) ?? 0;
+                        if (parsed <= widget.maxQuantity) {
+                          widget.onQuantityChanged(value);
+                        } else {
+                          _quantityController.text =
+                              widget.maxQuantity.toString();
+                          _quantityController
+                              .selection = TextSelection.fromPosition(
+                            TextPosition(
+                              offset: _quantityController.text.length,
+                            ),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Maximum quantity is ${widget.maxQuantity}',
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                          widget.onQuantityChanged(
+                            widget.maxQuantity.toString(),
+                          );
+                        }
+                      }
+                    },
+                    decoration: _buildInputDecoration('Quantity'),
                   ),
                 ),
                 const SizedBox(width: 8),
+
                 Expanded(
                   child: TextField(
                     controller: _priceController,
+                    readOnly: widget.selectedProduct != 'Others Items',
+                    onChanged: (value) {
+                      widget.onPriceChanged(value);
+                    },
                     decoration: _buildInputDecoration('Price'),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                    ],
-                    onChanged: widget.onPriceChanged,
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Amount: ₹${amount.toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ],

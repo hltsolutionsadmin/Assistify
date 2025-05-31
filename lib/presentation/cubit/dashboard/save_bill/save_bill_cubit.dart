@@ -1,6 +1,7 @@
 import 'package:assistify/core/constants/custome_snack_bar.dart';
 import 'package:assistify/domain/usecase/dashboard/save_bill_usecase.dart';
 import 'package:assistify/presentation/cubit/dashboard/save_bill/save_bill_state.dart';
+import 'package:assistify/presentation/screen/dashboard/dash_board_screen.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -38,8 +39,13 @@ class SaveBillCubit extends Cubit<SaveBillState> {
       final saveBillEntity = await useCase.call(body);
       print(saveBillEntity);
       if (saveBillEntity.status == 'SUCCESS') {
-        Navigator.pop(context);
         _launchWhatsApp(context, body, companyName, category);
+               Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => DashBoardScreen()),
+                        (_) => false,
+                      );
+
         emit(SaveBillLoaded(saveBillEntity));
       } else {
         CustomSnackbars.showErrorSnack(
@@ -62,17 +68,13 @@ class SaveBillCubit extends Cubit<SaveBillState> {
   Future<void> _launchWhatsApp(context, body, companyName, category) async {
     String phone = body['phoneNumber'] ?? '';
     print('phone: $phone');
-    // String sanitizedPhone = phone.replaceAll(RegExp(r'[^0-9+]'), '');
-    // if (sanitizedPhone.startsWith('+')) {
-    //   sanitizedPhone = sanitizedPhone.substring(1);
-    // }
 
     String message1 = ''' 
 Hello *${body['customerName']}*
 Please find the requested details:
 Product: *${body['productName']}*(${body['modelNumber']}, ${body['serialNumber']})
-Order/Complaint: *${'complaint'}*
-Job/OrderId: *${'jobId'}*
+Order/Complaint: *${body['complaint']}*
+Job/OrderId: *${body['jobId']}*
 Status: *${body['status']}*
 
 Thanks & Regards

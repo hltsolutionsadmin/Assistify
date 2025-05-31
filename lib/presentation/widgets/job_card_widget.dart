@@ -12,7 +12,17 @@ class JobCard extends StatefulWidget {
   final Function? fetchData;
   String? companyName;
   num? category;
-  JobCard({super.key, required this.jobData, this.fetchData, this.companyName, this.category});
+  String? logo;
+  String? banner;
+  JobCard({
+    super.key,
+    required this.jobData,
+    this.fetchData,
+    this.companyName,
+    this.category,
+    this.banner,
+    this.logo,
+  });
 
   @override
   State<JobCard> createState() => _JobCardState();
@@ -35,7 +45,7 @@ class _JobCardState extends State<JobCard> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                 CircleAvatar(
+                CircleAvatar(
                   radius: 24,
                   backgroundColor: AppColor.gray,
                   child: Icon(Icons.person, size: 30),
@@ -64,18 +74,20 @@ class _JobCardState extends State<JobCard> {
                   children: [
                     InkWell(
                       onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddJobFormScreen(
-                        jobData: widget.jobData,
-                        title: 'Edit Job',
-                        companyName: widget.companyName
-                      ),
-                    ),
-                  ).then((_) {
-                    if (widget.fetchData != null) widget.fetchData!();
-                  });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => AddJobFormScreen(
+                                  jobData: widget.jobData,
+                                  title: 'Edit Job',
+                                  companyName: widget.companyName,
+                                ),
+                          ),
+                        )
+                        .then((_) {
+                          if (widget.fetchData != null) widget.fetchData!();
+                        });
                       },
                       child: Icon(Icons.edit, size: 24),
                     ),
@@ -88,15 +100,12 @@ class _JobCardState extends State<JobCard> {
                               widget.jobData,
                               widget.fetchData,
                               0,
-                              widget.companyName
+                              widget.companyName,
+                              widget.banner, 
+                              widget.logo
                             ),
                           },
                       child: Icon(Icons.description, size: 24),
-                    ),
-                    SizedBox(height: 12),
-                    InkWell(
-                      onTap: () => {},
-                      child: Icon(Icons.upload, size: 24),
                     ),
                   ],
                 ),
@@ -167,8 +176,8 @@ class _JobCardState extends State<JobCard> {
                   style: TextStyle(color: Colors.white, fontSize: 13),
                 ),
                 Text(
-                  "Total Amount: ₹ ${widget.jobData.totalAmount?.toStringAsFixed(2) ?? '0.00'}",
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  "Total Amount: ₹ ${widget.jobData.totalAmount?.toStringAsFixed(2) ?? '0.0'}",
+                  style: TextStyle(color: Colors.white, fontSize: 13, overflow: TextOverflow.ellipsis),
                 ),
               ],
             ),

@@ -113,7 +113,6 @@ class _SettingsViewState extends State<SettingsScreen> {
             isLoading = false;
             updated = true;
           });
-          Navigator.pop(context, true);
         } else if (state is EditProfileError) {
           setState(() {
             isLoading = false;

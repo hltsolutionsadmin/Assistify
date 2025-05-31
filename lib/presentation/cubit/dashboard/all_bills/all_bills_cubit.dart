@@ -18,8 +18,8 @@ class AllBillsCubit extends Cubit<AllBillsState> {
 
 List<Bills>? _allBills = [];
     
-
-  Future<void> all_bills(BuildContext context, dynamic body) async {
+bool _isFilterApplied = false;
+  Future<void> all_bills(BuildContext context, dynamic body, {bool isFilter = false}) async {
   bool isConnected = await networkService.hasInternetConnection();
   if (!isConnected) {
     CustomSnackbars.showErrorSnack(
@@ -32,7 +32,8 @@ List<Bills>? _allBills = [];
 
   try {
     if (body["pageNumber"] == "1") {
-      _allBills = []; // Reset if first page
+      _allBills = [];
+      _isFilterApplied = isFilter;
       emit(AllBillsLoading());
     }
 
@@ -43,8 +44,8 @@ List<Bills>? _allBills = [];
       _allBills!.addAll(newBills);
       emit(AllBillsLoaded(
         AllBillsModel(
-            status: allBillsEntity.status,
-            message: allBillsEntity.message,
+          status: allBillsEntity.status,
+          message: allBillsEntity.message,
           data: Data(bills: _allBills),
         ),
       ));
@@ -53,6 +54,7 @@ List<Bills>? _allBills = [];
     emit(AllBillsError('Failed to load bills: ${e.toString()}'));
   }
 }
+
   
   
   Future<void> searchBills({

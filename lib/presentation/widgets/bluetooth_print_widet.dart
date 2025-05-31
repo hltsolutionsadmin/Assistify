@@ -9,13 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_printer/flutter_bluetooth_printer_library.dart';
 
 class PrintScreen extends StatefulWidget {
-  dynamic data;
-  String? companyName;
-  num? category;
-  List<dynamic>? spares;
-  String? logo;
+  final dynamic data;
+  final String? companyName;
+  final num? category;
+  final List<dynamic>? spares;
+  final String? logo;
 
-  PrintScreen({
+  const PrintScreen({
     Key? key,
     this.data,
     this.companyName,
@@ -23,304 +23,161 @@ class PrintScreen extends StatefulWidget {
     this.spares,
     this.logo,
   }) : super(key: key);
+
   @override
-  _PrintScreenState createState() => _PrintScreenState();
+  State<PrintScreen> createState() => _PrintScreenState();
 }
 
 class _PrintScreenState extends State<PrintScreen> {
   Uint8List? bytes;
-  image() {
-    if (widget.logo != null && widget.logo!.isNotEmpty) {
-      final base64String = widget.logo?.split(',').last;
-      bytes = base64Decode(base64String.toString());
-    }
-  }
-
+  late String productsText;
   ReceiptController? controller;
-  @override
-  String productsText = '';
 
+  final TextStyle boldStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+  final TextStyle normalStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w500);
+
+  @override
   void initState() {
     super.initState();
-    if (widget.spares != null) {
-      productsText = widget.spares!.map((e) => e.product).join(', ');
-      print(productsText);
+    print(widget.logo);
+    if (widget.logo?.isNotEmpty == true) {
+       Future.delayed(const Duration(seconds: 2));
+      final base64String = widget.logo!.split(',').last;
+      bytes = base64Decode(base64String);
     }
+    productsText = widget.spares?.map((e) => e.product).join(', ') ?? '';
   }
+
+  Widget _infoRow(String label, String value) => Row(
+        children: [
+          Text(label, style: boldStyle),
+          const SizedBox(width: 4),
+          Text(value, style: normalStyle),
+        ],
+      );
+
+  Widget _buildCustomerInfo() => Column(
+        children: [
+          _infoRow('Name:', widget.data.customerName),
+          const SizedBox(height: 10),
+          _infoRow('Phone Number:', widget.data.phoneNumber),
+          const SizedBox(height: 10),
+          _infoRow('Address:', widget.data.address),
+          const Text('------------------------'),
+        ],
+      );
+
+  Widget _buildSparesTable() => Container(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Item', style: boldStyle),
+                Text('Quantity', style: boldStyle),
+                Text('Price', style: boldStyle),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ...?widget.spares?.map(
+              (spare) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(flex: 2, child: Text(spare.product, style: normalStyle)),
+                    Expanded(child: Text('${spare.quantity}', textAlign: TextAlign.center, style: normalStyle)),
+                    Expanded(child: Text('₹${spare.price}', textAlign: TextAlign.right, style: normalStyle)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Widget _buildRow(String label, String value) => Row(
+        children: [
+          Text(label, style: boldStyle),
+          const SizedBox(width: 4),
+          Text(value, style: const TextStyle(fontSize: 18)),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
+    final isCategory2 = widget.category == 2;
+    final data = widget.data;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Mobile Print"),
+        title: const Text("Mobile Print"),
         centerTitle: true,
         backgroundColor: AppColor.white,
         shadowColor: AppColor.white,
       ),
       body: Receipt(
-        builder:
-            (context) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    bytes == null
-                        ? Image.asset(Logo, width: 100, height: 100)
-                        : SizedBox(),
-                    if (bytes != null)
-                      Image.memory(bytes!, height: 150, width: 500),
+        builder: (context) => SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  bytes == null
+                      ? Image.asset(Logo, width: 100, height: 100)
+                      : Image.memory(bytes!, height: 150, width: 100),
+                  const SizedBox(width: 8),
+                  if (widget.companyName != null)
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          widget.companyName ?? '',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        Text(widget.companyName!, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       ],
                     ),
-                  ],
-                ),
-                Text('------------------------'),
-                SizedBox(height: 10),
-                widget.category == 2
-                    ? Column(
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Name:',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              widget.data.customerName,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Phone Number:',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              widget.data.phoneNumber,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Address:',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              widget.data.address,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text('------------------------'),
-                      ],
-                    )
-                    : Row(
-                      children: [
-                        Text(
-                          'Product:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          widget.data.productName.toString(),
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ],
-                    ),
-                SizedBox(height: 10),
-                widget.category == 2
-                    ? Column(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(8),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Item',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Quantity',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Price',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              ...widget.spares!
-                                  .map(
-                                    (spare) => Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 4.0,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            flex: 2,
-                                            child: Text(
-                                              spare.product,
-                                              style: TextStyle(fontSize: 16),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                              spare.quantity.toString(),
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(fontSize: 16),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                              '₹${spare.price}',
-                                              textAlign: TextAlign.right,
-                                              style: TextStyle(fontSize: 16),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
-                    : Row(
-                      children: [
-                        Text(
-                          'Order/Complaint:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          widget.data.complaint,
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ],
-                    ),
-                SizedBox(height: 10),
-                Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-
-                      children: [
-                        Text(
-                          widget.category == 2 ? 'Total Price:' : 'JobId:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          widget.category == 2
-                              ? widget.data?.totalAmount.toString() ?? ''
-                              : widget.data.jobId.toString(),
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                widget.category == 2
-                    ? SizedBox()
-                    : Row(
-                      children: [
-                        Text(
-                          'Status:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          widget.data.status.toString(),
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ],
-                    ),
-                SizedBox(height: 10),
-                Text(
-                  'Thanks & Regards:',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  widget.companyName ?? '',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  widget.data.phoneNumber.toString(),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                ),
-                SizedBox(height: 5),
-                Text('------------------------'),
-                SizedBox(height: 5),
-                Center(child: Image.asset(qrcode, width: 150, height: 150)),
-                SizedBox(height: 80),
-              ],
-            ),
-        onInitialized: (controller) {
-          this.controller = controller;
-        },
+                ],
+              ),
+              const Text('------------------------'),
+              const SizedBox(height: 10),
+              isCategory2
+                  ? _buildCustomerInfo()
+                  : _buildRow('Product:', data.productName.toString()),
+              const SizedBox(height: 10),
+              isCategory2
+                  ? _buildSparesTable()
+                  : _buildRow('Order/Complaint:', data.complaint),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment:isCategory2 ? MainAxisAlignment.end:  MainAxisAlignment.start,
+                children: [
+                  Text(isCategory2 ? 'Total Price:' : 'JobId:', style: boldStyle),
+                  const SizedBox(width: 4),
+                  Text(
+                    isCategory2
+                        ? data?.totalAmount.toString() ?? ''
+                        : data.jobId.toString(),
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (!isCategory2)
+                _buildRow('Status:', data.status.toString()),
+              const SizedBox(height: 10),
+              Text('Thanks & Regards:', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 5),
+              if (widget.companyName != null)
+                Text(widget.companyName!, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              Text(data.phoneNumber.toString(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 5),
+              const Text('------------------------'),
+              const SizedBox(height: 5),
+              Center(child: Image.asset(qrcode, width: 150, height: 150)),
+              const SizedBox(height: 80),
+            ],
+          ),
+        ),
+        onInitialized: (ctrl) => controller = ctrl,
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -335,7 +192,7 @@ class _PrintScreenState extends State<PrintScreen> {
                 addFeeds: 4,
               );
             } else {
-              print("failed print");
+              debugPrint("failed print");
             }
           },
         ),

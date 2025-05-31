@@ -7,6 +7,8 @@ void showFilePopup(
   Function? fetchData,
   num? category,
   String? companyName,
+  String? banner,
+  String? logo,
 ) {
   showDialog(
     context: context,
