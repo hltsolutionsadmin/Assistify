@@ -39,7 +39,8 @@ class SaveBillCubit extends Cubit<SaveBillState> {
       final saveBillEntity = await useCase.call(body);
       print(saveBillEntity);
       if (saveBillEntity.status == 'SUCCESS') {
-        _launchWhatsApp(context, body, companyName, category);
+        final jobId = saveBillEntity.data?.bill![0].jobId;
+        _launchWhatsApp(context, body, companyName, category, jobId);
                Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => DashBoardScreen()),
@@ -65,7 +66,7 @@ class SaveBillCubit extends Cubit<SaveBillState> {
     }
   }
 
-  Future<void> _launchWhatsApp(context, body, companyName, category) async {
+  Future<void> _launchWhatsApp(context, body, companyName, category, jobId) async {
     String phone = body['phoneNumber'] ?? '';
     print('phone: $phone');
 
@@ -74,7 +75,7 @@ Hello *${body['customerName']}*
 Please find the requested details:
 Product: *${body['productName']}*(${body['modelNumber']}, ${body['serialNumber']})
 Order/Complaint: *${body['complaint']}*
-Job/OrderId: *${body['jobId']}*
+Job/OrderId: *$jobId*
 Status: *${body['status']}*
 
 Thanks & Regards

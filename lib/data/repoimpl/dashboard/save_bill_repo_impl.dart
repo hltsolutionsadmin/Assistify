@@ -13,7 +13,7 @@ class SaveBillRepoImpl implements SaveBillRepository {
     return SaveBillModel(
       message: model.message,
       status: model.status,  
-      // data: model.data,        
+      data: model.data,        
     );
   }
 }

@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:assistify/core/constants/colors.dart';
 import 'package:assistify/core/constants/imgs_const.dart';
-import 'package:assistify/data/model/dash_board/bill_spares_model.dart';
 import 'package:assistify/presentation/widgets/helper_widgets.dart/button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_printer/flutter_bluetooth_printer_library.dart';
@@ -37,16 +35,23 @@ class _PrintScreenState extends State<PrintScreen> {
   final TextStyle normalStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w500);
 
   @override
-  void initState() {
-    super.initState();
-    print(widget.logo);
-    if (widget.logo?.isNotEmpty == true) {
-       Future.delayed(const Duration(seconds: 2));
-      final base64String = widget.logo!.split(',').last;
+void initState() {
+  super.initState();
+print(widget.category);
+  if (widget.logo?.isNotEmpty == true) {
+    try {
+      final base64String = widget.logo!.contains(',')
+          ? widget.logo!.split(',').last
+          : widget.logo!;
       bytes = base64Decode(base64String);
+    } catch (e) {
+      debugPrint('Error decoding base64 image: $e');
     }
-    productsText = widget.spares?.map((e) => e.product).join(', ') ?? '';
   }
+
+  productsText = widget.spares?.map((e) => e.product).join(', ') ?? '';
+}
+
 
   Widget _infoRow(String label, String value) => Row(
         children: [
@@ -101,7 +106,7 @@ class _PrintScreenState extends State<PrintScreen> {
         children: [
           Text(label, style: boldStyle),
           const SizedBox(width: 4),
-          Text(value, style: const TextStyle(fontSize: 18)),
+          Text(value, style: const TextStyle(fontSize: 20)),
         ],
       );
 
@@ -172,7 +177,7 @@ class _PrintScreenState extends State<PrintScreen> {
               const SizedBox(height: 5),
               const Text('------------------------'),
               const SizedBox(height: 5),
-              Center(child: Image.asset(qrcode, width: 150, height: 150)),
+              Center(child: Image.asset(widget.category == 2  ? vegiPaymentQrCode : qrcode, width: 150, height: 150)),
               const SizedBox(height: 80),
             ],
           ),

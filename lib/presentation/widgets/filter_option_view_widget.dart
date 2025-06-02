@@ -282,6 +282,7 @@ class _FilterOptionsViewState extends State<FilterOptionsView> {
       widget.onFilter!(true);
     }
     _popWithFilters();
+
     context.read<AllBillsCubit>().all_bills(context, {
       "companyId": widget.companyId,
       "userId": widget.userId,

@@ -7,6 +7,7 @@ import 'package:assistify/presentation/screen/addjob/add_form.dart';
 import 'package:assistify/presentation/screen/addjob/add_job_form_screen.dart';
 import 'package:assistify/presentation/screen/dashboard/dashboard_functions_widget.dart';
 import 'package:assistify/presentation/widgets/dash_board_helper_widget.dart';
+import 'package:assistify/presentation/widgets/filter_option_view_widget.dart';
 import 'package:assistify/presentation/widgets/job_card_widget.dart';
 import 'package:assistify/presentation/widgets/vegi_customer_details_card.dart';
 import 'package:flutter/material.dart';
@@ -118,8 +119,14 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
   Future<void> _fetchAllBills() async {
     _isFetchingMore = true;
+    print('_isFilterApplied$_isFilterApplied');
     if (_isFilterApplied == true) {
-      // Handle filtered case
+      await context.read<AllBillsCubit>().all_bills(context, {
+        "userId": userId,
+        "companyId": companyId,
+        "pageNumber": _pageNumber.toString(),
+        "pageSize": _pageSize.toString(),
+      });
     } else {
       if (isRefresh) {
         _pageNumber = 1;
@@ -154,19 +161,96 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   ),
                 )
                 : null,
-        appBar:
-            App_Bar(
+        // appBar:
+            // App_Bar(
+            //       context: context,
+            //       companyId: companyId,
+            //       userId: userId,
+            //       fetchAllBills: _fetchAllBills,
+            //       filterData: filterData,
+            //       isFilterApplied: _isFilterApplied,
+            //       isRefresh: isRefresh,
+            //       scaffoldKey: _scaffoldKey,
+            //       setState: setState,
+            //       onFilter: (val) {
+            //         _isFilterApplied = val;
+            //       },
+            //       onTapFilter: (val) {
+            //         _isFilterApplied = val;
+            //       },
+            //     )
+                // as PreferredSizeWidget,
+                appBar: AppBar(
+        shadowColor: AppColor.white,
+        elevation: 2,
+        backgroundColor: AppColor.white,
+        title: BlocBuilder<UserProfileCubit, UserProfileState>(
+          builder: (context, state) {
+            if (state is UserProfileLoaded) {
+              return Center(
+                child: Text(
+                  companyName ?? 'No Name',
+                  style: TextStyle(color: AppColor.blue),
+                ),
+              );
+            }
+            return Text('', style: TextStyle(color: AppColor.blue));
+          },
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.menu, size: 30, color: AppColor.blue),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: GestureDetector(
+              onTap: () async {
+                final result = await showModalBottomSheet<Map<String, dynamic>>(
                   context: context,
-                  companyId: companyId,
-                  userId: userId,
-                  fetchAllBills: _fetchAllBills,
-                  filterData: filterData,
-                  isFilterApplied: _isFilterApplied,
-                  isRefresh: isRefresh,
-                  scaffoldKey: _scaffoldKey,
-                  setState: setState,
-                )
-                as PreferredSizeWidget,
+                  isScrollControlled: true,
+                  builder:
+                      (context) => Container(
+                        height: MediaQuery.of(context).size.height * 0.9,
+                        child: FilterOptionsView(
+                          companyId: companyId,
+                          userId: userId,
+                          initialName: filterData?['name'],
+                          initialPhone: filterData?['phone'],
+                          initialStatus: filterData?['status'],
+                          initialFromDate: filterData?['fromDate'],
+                          initialToDate: filterData?['toDate'],
+                          fetchData: _fetchAllBills,
+                           onFilter: (val) {
+                     _isFilterApplied = val;
+                   },
+                        ),
+                      ),
+                );
+
+                if (result != null) {
+                  setState(() {
+                    filterData = result;
+                  });
+                }
+              },
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColor.blue,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Icon(
+                  Icons.filter_alt_outlined,
+                  size: 30,
+                  color: AppColor.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
         backgroundColor: AppColor.white,
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -362,4 +446,3 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
     );
   }
 }
-

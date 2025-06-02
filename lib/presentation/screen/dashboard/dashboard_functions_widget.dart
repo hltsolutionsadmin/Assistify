@@ -163,6 +163,8 @@ Widget App_Bar({
   isRefresh,
   isFilterApplied,
   setState,
+  final void Function(bool)? onFilter,
+ final void Function(bool)? onTapFilter,
 }) {
   return AppBar(
     shadowColor: AppColor.white,
@@ -215,6 +217,7 @@ Widget App_Bar({
                         isFilterApplied = val;
                         fetchAllBills();
                       },
+                      
                     ),
                   ),
             );
