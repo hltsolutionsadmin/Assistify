@@ -33,7 +33,6 @@ Widget Drawer_tab({
   fetchAllBills,
   fetchUserProfile,
 }) {
-  print(companyName);
   return Column(
     children: [
       Container(
@@ -74,7 +73,7 @@ Widget Drawer_tab({
                   Navigator.pop(context);
                   fetchAllBills();
                 }),
-                if (categoryId != 2)
+                // if (categoryId != 2)
                   _buildDrawerItem(Icons.inventory, 'Inventory', () {
                     Navigator.pop(context);
                     Navigator.push(

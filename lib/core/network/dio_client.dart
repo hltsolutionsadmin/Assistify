@@ -44,15 +44,16 @@ class DioClient {
  
         log('ERROR[$statusCode] => MESSAGE: $errorMessage');
         if (statusCode == 400) {
-          log("Error: Resource not found");
+          log("Error: Bad request");
         } else if (statusCode == 404) {
-          log("Error: Resource not found");
+          log("Error: Method Not support");
         } else if (statusCode == 500) {
-          log("Error: Server error");
+          log("Error: Internal Server error");
         } else if (statusCode == 401) {
           log("Error: Unauthorized access - token may have expired");
+        } else if(statusCode == 403){
+          log("Error: Forbidden");
         }
- 
         return handler.next(error);
       },
     ));

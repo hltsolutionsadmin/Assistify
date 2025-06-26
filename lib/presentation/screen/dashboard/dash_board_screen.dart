@@ -161,96 +161,77 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   ),
                 )
                 : null,
-        // appBar:
-            // App_Bar(
-            //       context: context,
-            //       companyId: companyId,
-            //       userId: userId,
-            //       fetchAllBills: _fetchAllBills,
-            //       filterData: filterData,
-            //       isFilterApplied: _isFilterApplied,
-            //       isRefresh: isRefresh,
-            //       scaffoldKey: _scaffoldKey,
-            //       setState: setState,
-            //       onFilter: (val) {
-            //         _isFilterApplied = val;
-            //       },
-            //       onTapFilter: (val) {
-            //         _isFilterApplied = val;
-            //       },
-            //     )
-                // as PreferredSizeWidget,
-                appBar: AppBar(
-        shadowColor: AppColor.white,
-        elevation: 2,
-        backgroundColor: AppColor.white,
-        title: BlocBuilder<UserProfileCubit, UserProfileState>(
-          builder: (context, state) {
-            if (state is UserProfileLoaded) {
-              return Center(
-                child: Text(
-                  companyName ?? 'No Name',
-                  style: TextStyle(color: AppColor.blue),
-                ),
-              );
-            }
-            return Text('', style: TextStyle(color: AppColor.blue));
-          },
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.menu, size: 30, color: AppColor.blue),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: GestureDetector(
-              onTap: () async {
-                final result = await showModalBottomSheet<Map<String, dynamic>>(
-                  context: context,
-                  isScrollControlled: true,
-                  builder:
-                      (context) => Container(
-                        height: MediaQuery.of(context).size.height * 0.9,
-                        child: FilterOptionsView(
-                          companyId: companyId,
-                          userId: userId,
-                          initialName: filterData?['name'],
-                          initialPhone: filterData?['phone'],
-                          initialStatus: filterData?['status'],
-                          initialFromDate: filterData?['fromDate'],
-                          initialToDate: filterData?['toDate'],
-                          fetchData: _fetchAllBills,
-                           onFilter: (val) {
-                     _isFilterApplied = val;
-                   },
-                        ),
-                      ),
+        appBar: AppBar(
+          shadowColor: AppColor.white,
+          elevation: 2,
+          backgroundColor: AppColor.white,
+          title: BlocBuilder<UserProfileCubit, UserProfileState>(
+            builder: (context, state) {
+              if (state is UserProfileLoaded) {
+                return Center(
+                  child: Text(
+                    companyName,
+                    style: TextStyle(color: AppColor.blue),
+                  ),
                 );
-
-                if (result != null) {
-                  setState(() {
-                    filterData = result;
-                  });
-                }
-              },
-              child: Container(
-                margin: const EdgeInsets.all(8),
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppColor.blue,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: Icon(
-                  Icons.filter_alt_outlined,
-                  size: 30,
-                  color: AppColor.white,
+              }
+              return Text('', style: TextStyle(color: AppColor.blue));
+            },
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.menu, size: 30, color: AppColor.blue),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () async {
+                  final result =
+                      await showModalBottomSheet<Map<String, dynamic>>(
+                        context: context,
+                        isScrollControlled: true,
+                        builder:
+                            (context) => Container(
+                              height: MediaQuery.of(context).size.height * 0.9,
+                              child: FilterOptionsView(
+                                companyId: companyId,
+                                userId: userId,
+                                initialName: filterData?['name'],
+                                initialPhone: filterData?['phone'],
+                                initialStatus: filterData?['status'],
+                                initialFromDate: filterData?['fromDate'],
+                                initialToDate: filterData?['toDate'],
+                                fetchData: _fetchAllBills,
+                                onFilter: (val) {
+                                  _isFilterApplied = val;
+                                },
+                              ),
+                            ),
+                      );
+                  if (result != null) {
+                    setState(() {
+                      filterData = result;
+                    });
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColor.blue,
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: Icon(
+                    Icons.filter_alt_outlined,
+                    size: 30,
+                    color: AppColor.white,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
         backgroundColor: AppColor.white,
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -281,6 +262,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
             onRefresh: () async {
               setState(() {
                 isRefresh = true;
+                _pageNumber = 1;
                 _fetchAllBills();
               });
             },

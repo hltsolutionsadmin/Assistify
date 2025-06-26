@@ -27,12 +27,6 @@ class VegiCustomerDetailsCard extends StatefulWidget {
 
 class _JobCardState extends State<VegiCustomerDetailsCard> {
   final DateFormat _dateFormat = DateFormat('dd MMM yyyy');
-  
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   print(widget.category);
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -98,14 +92,6 @@ class _JobCardState extends State<VegiCustomerDetailsCard> {
                     InkWell(
                       onTap:
                           () => {
-                            // showFilePopup(
-                            //   context,
-                            //   widget.custData,
-                            //   widget.fetchData,
-                            //   widget.category,
-                            //   widget.companyName
-
-                            // ),
                             Navigator.push(
                               context,
                               MaterialPageRoute(

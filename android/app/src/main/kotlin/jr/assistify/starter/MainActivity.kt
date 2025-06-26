@@ -1,0 +1,6 @@
+package jr.assistify.starter
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity() {
+}

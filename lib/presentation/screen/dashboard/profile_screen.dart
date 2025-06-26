@@ -55,7 +55,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.white,
         centerTitle: true,
         title: const Text("Profile", style: TextStyle(color: Colors.black)),
-        
+
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
@@ -77,16 +76,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: BlocBuilder<UserProfileCubit, UserProfileState>(
         builder: (context, state) {
           if (state is UserProfileLoading) {
-            return const Center(child: CupertinoActivityIndicator(color: Colors.blue));
+            return const Center(
+              child: CupertinoActivityIndicator(color: Colors.blue),
+            );
           } else if (state is UserProfileLoaded) {
             final userProfile = state.userProfileModel;
-            final String base64Image = userProfile.data?.logo ?? '';
-            final String base64String = base64Image.split(',').last;
-            Uint8List bytes = base64Decode(base64String);
+            Uint8List? bytes;
+            final String? base64Image = userProfile.data?.logo;
+
+            if (base64Image != null && base64Image.isNotEmpty) {
+              try {
+                final String base64String =
+                    base64Image.contains(',')
+                        ? base64Image.split(',').last
+                        : base64Image;
+                bytes = base64Decode(base64String);
+              } catch (e) {
+                print('Error decoding base64 image: $e');
+              }
+            }
             return Container(
               color: AppColor.white,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 child: Column(
                   children: [
                     const SizedBox(height: 10),
@@ -98,7 +113,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.grey.shade300,
                       ),
                       clipBehavior: Clip.hardEdge,
-                      child: buildProfileImage(bytes),
+                      child:
+                          bytes != null
+                              ? buildProfileImage(bytes)
+                              :  Icon(
+                                Icons.person,
+                                size: 50,
+                                color: AppColor.white,
+                              ),
                     ),
                     const SizedBox(height: 15),
                     Text(
@@ -161,7 +183,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onPressed: () {
                           showModalBottomSheet(
                             context: context,
-                            builder: (context) => const LogOutCnfrmBottomSheet(),
+                            builder:
+                                (context) => const LogOutCnfrmBottomSheet(),
                           );
                         },
                         style: ElevatedButton.styleFrom(

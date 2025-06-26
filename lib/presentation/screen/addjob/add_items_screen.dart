@@ -1,6 +1,8 @@
 import 'package:assistify/components/custome_text_field.dart';
 import 'package:assistify/core/constants/colors.dart';
 import 'package:assistify/core/constants/sizes.dart';
+import 'package:assistify/presentation/cubit/add_products/add_products_cubit.dart';
+import 'package:assistify/presentation/cubit/add_products/add_products_state.dart';
 import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_cubit.dart';
 import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_state.dart';
 import 'package:assistify/presentation/cubit/dashboard/save_bill/save_bill_cubit.dart';
@@ -15,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:assistify/data/model/add_product/get_products_list_model.dart';
 
 // ignore: must_be_immutable
 class AddItemsScreen extends StatefulWidget {
@@ -41,6 +44,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
   String? _companyId;
   bool isLoading = false;
   bool showSearchResults = false;
+  List<Data> _selectProducts = [];
 
   final TextEditingController _customerNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
@@ -62,6 +66,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
   bool _addressError = false;
   bool _sparesError = false;
   bool buttonError = true;
+  String? selectedProduct = '';
 
   List<Map<String, dynamic>> _spareBoxes = [];
 
@@ -71,6 +76,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
     _fetchData();
     _updateBalanceAmount();
     _paidAmountController.addListener(_updateBalanceAmount);
+    // final state = context.read<
     if (widget.jobData != null) {
       context.read<AllBillsCubit>().spareBills(
         context: context,
@@ -84,19 +90,48 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
       }
     }
     edit_details();
-    _validateItems();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        buttonError = !_validateItems();
+      });
+    });
   }
 
-  void _validateItems() {
+  bool _validateItems() {
     final isValid = _spareBoxes.every((box) {
       final name = (box['name'] as String?)?.trim() ?? '';
       final quantity = box['quantity'] as int? ?? 0;
       final price = box['price'] as double? ?? 0.0;
-      return name.isNotEmpty && quantity > 0 && price > 0.0;
+      final bool nameValidForOthers =
+          box['selectedProduct'] == 'Others Items' ? name.isNotEmpty : true;
+      final bool productSelected =
+          box['selectedProduct'] != null &&
+          (box['selectedProduct'] as String).isNotEmpty;
+      if (!productSelected) {
+        return name.isNotEmpty && quantity > 0 && price > 0.0;
+      } else if (box['selectedProduct'] == 'Others Items') {
+        return name.isNotEmpty && quantity > 0 && price > 0.0;
+      } else {
+        return quantity > 0 && price > 0.0;
+      }
     });
+    return isValid;
+  }
 
+  void _onSpareBoxChanged(int index, Map<String, dynamic> changes) {
     setState(() {
-      buttonError = !isValid;
+      final updatedBox = {..._spareBoxes[index], ...changes};
+
+      if (selectedProduct != 'Others Items') {
+        final quantity =
+            double.tryParse(updatedBox['quantity'].toString()) ?? 0;
+        final price = double.tryParse(updatedBox['price'].toString()) ?? 0.0;
+        updatedBox['total'] = quantity * price;
+      }
+
+      _spareBoxes[index] = updatedBox;
+      _updateBalanceAmount();
+      buttonError = !_validateItems();
     });
   }
 
@@ -116,8 +151,9 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
   Future<void> _fetchData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _userId = prefs.getString('userId') ?? '';
-      _companyId = prefs.getString('companyId') ?? '';
+       _userId = prefs.getString('userId') ?? '';
+    _companyId = prefs.getString('companyId') ?? '';
+    context.read<AddProductsCubit>().getProduct(context, _companyId!);
     });
   }
 
@@ -153,6 +189,101 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
     return name.isNotEmpty && quantity > 0 && price > 0.0;
   }
 
+  void _showSelectProductDialogForSpareBox(int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String? tempProductSelectedName = _spareBoxes[index]['selectedProduct'];
+        Data? selectedProductObject;
+        selectedProduct = _spareBoxes[index]['selectedProduct'];
+        return AlertDialog(
+          backgroundColor: AppColor.white,
+          title: const Text('Select Item'),
+          content: StatefulBuilder(
+            builder:
+                (context, setState) => SizedBox(
+                  width: double.maxFinite,
+                  child: ListView(
+                    shrinkWrap: true,
+                    children:
+                        _selectProducts
+                            .map(
+                              (product) => RadioListTile<String>(
+                                fillColor: MaterialStateProperty.all(
+                                  AppColor.blue,
+                                ),
+                                title: Text(product.productName ?? ''),
+                                value: product.productName ?? '',
+                                groupValue: tempProductSelectedName,
+                                onChanged: (value) {
+                                  setState(() {
+                                    tempProductSelectedName = value;
+                                    selectedProductObject = _selectProducts
+                                        .firstWhere(
+                                          (p) => p.productName == value,
+                                          orElse: () => Data(),
+                                        );
+                                  });
+                                },
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                  ),
+                ),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel', style: TextStyle(color: AppColor.black)),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('OK', style: TextStyle(color: AppColor.blue)),
+              onPressed: () {
+                setState(() {
+                  _spareBoxes[index]['selectedProduct'] =
+                      tempProductSelectedName;
+                  _spareBoxes[index]['showOtherItemsFields'] =
+                      tempProductSelectedName == 'Others Items';
+
+                  if (selectedProductObject != null) {
+                    _spareBoxes[index]['quantity'] =
+                        selectedProductObject!.quantity ?? 0;
+                    _spareBoxes[index]['price'] =
+                        selectedProductObject!.price ?? 0.0;
+                    _spareBoxes[index]['maxQuantity'] =
+                        selectedProductObject!.quantity ?? 0;
+                    _spareBoxes[index]['name'] =
+                        selectedProductObject!.productName;
+                    _spareBoxes[index]['productId'] = selectedProductObject!.id;
+                  } else {
+                    _spareBoxes[index]['quantity'] = 0;
+                    _spareBoxes[index]['price'] = 0.0;
+                    _spareBoxes[index]['maxQuantity'] = 100;
+                    _spareBoxes[index]['name'] = tempProductSelectedName;
+                    _spareBoxes[index]['productId'] = '';
+                  }
+                  _spareBoxes[index]['total'] =
+                      (_spareBoxes[index]['quantity'] ?? 0) *
+                      (_spareBoxes[index]['price'] ?? 0.0);
+                  _updateBalanceAmount();
+
+                  _validateItems();
+                  print(
+                    'DEBUG: After OK in dialog, _spareBoxes[$index]: ${_spareBoxes[index]}',
+                  );
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -166,7 +297,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
         shadowColor: AppColor.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, false),
         ),
       ),
       backgroundColor: AppColor.white,
@@ -316,7 +447,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                     style: TextStyle(color: AppColor.red),
                   )
                   : SizedBox(),
-                  SizedBox(height: 10,),
+              SizedBox(height: 10),
               customTextField(
                 _customerNameController,
                 'Customer Name',
@@ -355,34 +486,67 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                 },
               ),
               const SectionHeader(Icons.circle, 'Add Items'),
-              BlocListener<AllBillsCubit, AllBillsState>(
-                listener: (context, state) {
-                  if (state is SpareBillsLoaded) {
-                    setState(() {
-                      _spareBoxes =
-                          state.billSparesModel.data!.map((spare) {
-                            return {
-                              'id': spare.id,
-                              'quantity': spare.quantity ?? 0,
-                              'price': spare.price ?? 0.0,
-                              'total':
-                                  (spare.quantity ?? 0) * (spare.price ?? 0.0),
-                              'name': spare.product ?? '',
-                              'description': spare.description ?? '',
-                              'selectedProduct': spare.product ?? '',
-                              'showOtherItemsFields': false,
-                            };
-                          }).toList();
-                      _validateItems();
-                    });
-                  }
-                },
+              MultiBlocListener(
+                listeners: [
+                  BlocListener<AllBillsCubit, AllBillsState>(
+                    listener: (context, state) {
+                      if (state is SpareBillsLoaded) {
+                        setState(() {
+                          _spareBoxes =
+                              state.billSparesModel.data!.map((spare) {
+                                final isOtherItem =
+                                    spare.productId ==
+                                    "2855035b-18f8-4c3a-9a90-812788f70d95";
+                                return {
+                                  'id': spare.id,
+                                  'quantity': spare.quantity ?? 0,
+                                  'price': spare.price ?? 0.0,
+                                  'total':
+                                      (spare.quantity ?? 0) *
+                                      (spare.price ?? 0.0),
+                                  'name':
+                                      isOtherItem
+                                          ? (spare.product ?? '')
+                                          : spare.product ?? '',
+                                  'description':
+                                      isOtherItem
+                                          ? (spare.description ?? '')
+                                          : spare.description ?? '',
+                                  'selectedProduct':
+                                      isOtherItem
+                                          ? 'Others Items'
+                                          : (spare.product ?? ''),
+                                  'showOtherItemsFields':
+                                      isOtherItem ||
+                                      spare.product == 'Others Items',
+                                  'productId': spare.productId ?? '',
+                                  'maxQuantity': 1000,
+                                };
+                              }).toList();
+                          _validateItems();
+                        });
+                      }
+                    },
+                  ),
+                  BlocListener<AddProductsCubit, AddProductsState>(
+                    listener: (context, state) {
+                      if (state is GetProductsLoaded) {
+                        print('-----${state.getProductsListModel.data?[0]}');
+                        setState(() {
+                          _selectProducts =
+                              state.getProductsListModel.data ?? [];
+                        });
+                      }
+                    },
+                  ),
+                ],
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_spareBoxes.isNotEmpty)
                       ...List.generate(_spareBoxes.length, (index) {
                         final currentSpareBoxData = _spareBoxes[index];
+                        print(index);
                         return SpareItemsBox(
                           key: ValueKey(currentSpareBoxData['id']),
                           index: index,
@@ -391,39 +555,20 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                               currentSpareBoxData['selectedProduct'],
                           showOtherItemsFields:
                               currentSpareBoxData['showOtherItemsFields'],
-                          onNameChanged: (value) {
-                            setState(() {
-                              currentSpareBoxData['name'] = value;
-                              _validateItems();
-                            });
-                          },
-                          onDescriptionChanged: (value) {
-                            setState(() {
-                              currentSpareBoxData['description'] = value;
-                            });
-                          },
-                          onQuantityChanged: (value) {
-                            setState(() {
-                              currentSpareBoxData['quantity'] =
-                                  int.tryParse(value) ?? 0;
-                              currentSpareBoxData['total'] =
-                                  (currentSpareBoxData['quantity'] ?? 0) *
-                                  (currentSpareBoxData['price'] ?? 0.0);
-                              _updateBalanceAmount();
-                              _validateItems();
-                            });
-                          },
-                          onPriceChanged: (value) {
-                            setState(() {
-                              currentSpareBoxData['price'] =
-                                  double.tryParse(value) ?? 0.0;
-                              currentSpareBoxData['total'] =
-                                  (currentSpareBoxData['quantity'] ?? 0) *
-                                  (currentSpareBoxData['price'] ?? 0.0);
-                              _updateBalanceAmount();
-                              _validateItems();
-                            });
-                          },
+                          onNameChanged:
+                              (v) => _onSpareBoxChanged(index, {'name': v}),
+
+                          onDescriptionChanged:
+                              (v) =>
+                                  _onSpareBoxChanged(index, {'description': v}),
+                          onQuantityChanged:
+                              (v) => _onSpareBoxChanged(index, {
+                                'quantity': int.tryParse(v) ?? 0,
+                              }),
+                          onPriceChanged:
+                              (v) => _onSpareBoxChanged(index, {
+                                'price': double.tryParse(v) ?? 0,
+                              }),
                           onDelete: () {
                             setState(() {
                               _spareBoxes.removeAt(index);
@@ -431,6 +576,11 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                               _validateItems();
                             });
                           },
+                          onSelectProductTap: () {
+                            _showSelectProductDialogForSpareBox(index);
+                          },
+                          maxQuantity:
+                              currentSpareBoxData['maxQuantity'] ?? 1000,
                         );
                       }),
                     Text(
@@ -459,6 +609,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                                       'description': '',
                                       'selectedProduct': null,
                                       'showOtherItemsFields': false,
+                                      'maxQuantity': 1000,
                                     });
                                     _validateItems();
                                   });
