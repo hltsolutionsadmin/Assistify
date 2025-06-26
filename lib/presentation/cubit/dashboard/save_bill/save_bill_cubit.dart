@@ -73,7 +73,7 @@ class SaveBillCubit extends Cubit<SaveBillState> {
     String message1 = ''' 
 Hello *${body['customerName']}*
 Please find the requested details:
-Product: *${body['productName']}*(${body['modelNumber']}, ${body['serialNumber']})
+Product: *${body['productName']}(${body['modelNumber']}, ${body['serialNumber']})*
 Order/Complaint: *${body['complaint']}*
 Job/OrderId: *$jobId*
 Status: *${body['status']}*
@@ -94,11 +94,11 @@ Hello *${body['customerName']}*
 Please find the requested details:
 
 Item details
-$itemDetails
-TotalAmount: ₹${body['totalAmount']}
+*$itemDetails*
+TotalAmount: *₹${body['totalAmount']}*
 
 Thanks & Regards
-*${companyName}*
+*$companyName*
 *$phone*
     ''';
 

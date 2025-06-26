@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.assistify"
+    namespace = "jr.assistify.starter"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -20,12 +20,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.assistify"
+        applicationId = "jr.assistify.starter"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-    }
+    } 
 
     buildTypes {
         release {
@@ -33,7 +33,6 @@ android {
         }
     }
 }
-
 
 flutter {
     source = "../.."

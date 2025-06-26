@@ -5,6 +5,7 @@ import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_state
 import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_cubit.dart';
 import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_state.dart';
 import 'package:assistify/presentation/widgets/bluetooth_print_widet.dart';
+import 'package:assistify/presentation/widgets/date_converter_widget.dart';
 import 'package:assistify/presentation/widgets/generate_pdf_widget.dart';
 import 'package:assistify/presentation/widgets/helper_widgets.dart/button_widget.dart';
 import 'package:assistify/presentation/widgets/helper_widgets.dart/printing_screen_helper_widget.dart';
@@ -69,6 +70,7 @@ class _PrintingCardState extends State<PrintingCard> {
       bannerImage,
       context,
       widget.category,
+      widget.companyName
     );
     final bytes = await pdf.save();
 
@@ -143,12 +145,10 @@ class _PrintingCardState extends State<PrintingCard> {
         listeners: [
           BlocListener<AllBillsCubit, AllBillsState>(
             listener: (context, state) {
-              // Handle side effects here if needed (e.g., showSnackBar)
             },
           ),
           BlocListener<UserProfileCubit, UserProfileState>(
             listener: (context, state) {
-              // Handle side effects here if needed
             },
           ),
         ],
@@ -223,7 +223,7 @@ class _PrintingCardState extends State<PrintingCard> {
                                 ),
                                 buildInfoRow(
                                   "date: ",
-                                  '${widget.data.createdAt ?? ''}',
+                                  formatDate(widget.data.createdAt ?? ''),
                                 ),
                                 buildInfoRow(
                                   "Address: ",

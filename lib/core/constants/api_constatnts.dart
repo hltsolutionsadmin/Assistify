@@ -1,4 +1,4 @@
-const baseUrl = 'https://jrservice.in/';
+const baseUrl = 'https://jrservice.in';
 
 const login = '/api/Auth/login';
 const forgotPassword = '/api/Auth/forgot-password';

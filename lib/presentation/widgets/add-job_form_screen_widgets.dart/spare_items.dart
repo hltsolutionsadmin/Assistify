@@ -1,4 +1,5 @@
 import 'package:assistify/core/constants/colors.dart';
+import 'package:assistify/presentation/widgets/add-job_form_screen_widgets.dart/custom_drop_down_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,8 +11,11 @@ class SpareItemsBox extends StatefulWidget {
   final ValueChanged<String> onQuantityChanged;
   final ValueChanged<String> onPriceChanged;
   final VoidCallback onDelete;
+  final VoidCallback onSelectProductTap;
   final String? selectedProduct;
   final bool showOtherItemsFields;
+  final int maxQuantity;
+  final String? prodId;
 
   const SpareItemsBox({
     Key? key,
@@ -22,19 +26,22 @@ class SpareItemsBox extends StatefulWidget {
     required this.onQuantityChanged,
     required this.onPriceChanged,
     required this.onDelete,
+    required this.onSelectProductTap,
     this.selectedProduct,
     required this.showOtherItemsFields,
+    required this.maxQuantity,
+    this.prodId,
   }) : super(key: key);
 
   @override
-  _SpareBoxState createState() => _SpareBoxState();
+  State<SpareItemsBox> createState() => _SpareBoxState();
 }
 
 class _SpareBoxState extends State<SpareItemsBox> {
-  late TextEditingController _nameController;
-  late TextEditingController _descriptionController;
-  late TextEditingController _quantityController;
-  late TextEditingController _priceController;
+  late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _quantityController;
+  late final TextEditingController _priceController;
 
   @override
   void initState() {
@@ -47,46 +54,74 @@ class _SpareBoxState extends State<SpareItemsBox> {
     );
     _quantityController = TextEditingController(
       text:
-          widget.spareBox['quantity'] == 0
+          (widget.spareBox['quantity'] == null ||
+                  widget.spareBox['quantity'] == 0)
               ? ''
               : widget.spareBox['quantity'].toString(),
     );
     _priceController = TextEditingController(
       text:
-          widget.spareBox['price'] == 0.0
+          (widget.spareBox['price'] == null || widget.spareBox['price'] == 0.0)
               ? ''
               : widget.spareBox['price'].toString(),
     );
   }
 
   @override
-  void didUpdateWidget(covariant SpareItemsBox oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.spareBox['name'] != oldWidget.spareBox['name']) {
-      _nameController.text = widget.spareBox['name'] ?? '';
-    }
-    if (widget.spareBox['description'] != oldWidget.spareBox['description']) {
-      _descriptionController.text = widget.spareBox['description'] ?? '';
-    }
-    if (widget.spareBox['quantity'] != oldWidget.spareBox['quantity']) {
-      final newQuantity =
-          widget.spareBox['quantity'] == 0
-              ? ''
-              : widget.spareBox['quantity'].toString();
-      if (_quantityController.text != newQuantity) {
-        _quantityController.text = newQuantity;
-      }
-    }
-    if (widget.spareBox['price'] != oldWidget.spareBox['price']) {
-      final newPrice =
-          widget.spareBox['price'] == 0.0
-              ? ''
-              : widget.spareBox['price'].toString();
-      if (_priceController.text != newPrice) {
-        _priceController.text = newPrice;
-      }
+void didUpdateWidget(covariant SpareItemsBox oldWidget) {
+  print(widget.spareBox['name']);
+  super.didUpdateWidget(oldWidget);
+
+  _conditionallyUpdateControllerText(
+    _nameController,
+    widget.spareBox['name'] == 'Others Items' ? '' : widget.spareBox['name']  ?? '',
+  );
+
+  _conditionallyUpdateControllerText(
+    _descriptionController,
+    widget.spareBox['description'] ?? '',
+  );
+
+  _conditionallyUpdateControllerText(
+    _quantityController,
+    (widget.spareBox['quantity'] == null || widget.spareBox['quantity'] == 0)
+        ? ''
+        : widget.spareBox['quantity'].toString(),
+  );
+
+  _conditionallyUpdateControllerText(
+    _priceController,
+    (widget.spareBox['price'] == null || widget.spareBox['price'] == 0.0)
+        ? ''
+        : widget.spareBox['price'].toString(),
+  );
+}
+
+
+void _conditionallyUpdateControllerText(TextEditingController controller, String newText) {
+  if (controller.text != newText) {
+    final cursorPosition = controller.selection.baseOffset;
+    controller.text = newText;
+    if (cursorPosition >= 0 && cursorPosition <= newText.length) {
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: cursorPosition),
+      );
     }
   }
+}
+
+  InputDecoration _buildInputDecoration(String label) => InputDecoration(
+    labelText: label,
+    labelStyle: TextStyle(color: AppColor.black, fontSize: 14),
+    focusColor: AppColor.blue,
+    border: OutlineInputBorder(borderSide: BorderSide(color: AppColor.gray)),
+    enabledBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColor.gray),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColor.blue, width: 2),
+    ),
+  );
 
   @override
   void dispose() {
@@ -99,130 +134,118 @@ class _SpareBoxState extends State<SpareItemsBox> {
 
   @override
   Widget build(BuildContext context) {
+    final double amount =
+        (widget.spareBox['quantity'] ?? 0) * (widget.spareBox['price'] ?? 0.0);
     return Card(
       elevation: 4,
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       child: Container(
         color: AppColor.white,
-        child: Padding(
-          padding: EdgeInsets.all(4),
-          child: Column(
-            children: [
+        padding: const EdgeInsets.all(4),
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: Icon(Icons.cancel, color: AppColor.red),
+                onPressed: widget.onDelete,
+              ),
+            ),
+            CustomDropdownField(
+              hintText: 'Select Item',
+              selectedValue: widget.selectedProduct,
+              onTap: widget.onSelectProductTap,
+            ),
+            if (widget.showOtherItemsFields) ...[
+              const SizedBox(height: 12),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.cancel, color: AppColor.red),
-                    onPressed: widget.onDelete,
+                  Expanded(
+                    child: TextField(
+                      controller: _nameController,
+                      decoration: _buildInputDecoration('Name'),
+                      onChanged: widget.onNameChanged,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _descriptionController,
+                      decoration: _buildInputDecoration('Description'),
+                      onChanged: widget.onDescriptionChanged,
+                    ),
                   ),
                 ],
               ),
-              
-                SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _nameController,
-                        decoration: InputDecoration(
-                          labelText: 'Name',
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: widget.onNameChanged,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        controller: _descriptionController,
-                        decoration: InputDecoration(
-                          labelText: 'Description',
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: widget.onDescriptionChanged,
-                      ),
-                    ),
-                  ],
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _quantityController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: (value) {
+                      if (widget.selectedProduct == 'Others Items') {
+                        widget.onQuantityChanged(value);
+                      } else {
+                        final parsed = int.tryParse(value) ?? 0;
+                        if (parsed <= widget.maxQuantity) {
+                          widget.onQuantityChanged(value);
+                        } else {
+                          _quantityController.text =
+                              widget.maxQuantity.toString();
+                          _quantityController
+                              .selection = TextSelection.fromPosition(
+                            TextPosition(
+                              offset: _quantityController.text.length,
+                            ),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Maximum quantity is ${widget.maxQuantity}',
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                          widget.onQuantityChanged(
+                            widget.maxQuantity.toString(),
+                          );
+                        }
+                      }
+                    },
+                    decoration: _buildInputDecoration('Quantity'),
+                  ),
                 ),
-              
-              SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _quantityController,
-                      decoration: InputDecoration(
-                        labelText: 'Quantity',
-                        labelStyle: TextStyle(
-                          color: AppColor.black,
-                          fontSize: 14,
-                        ),
-                        focusColor: AppColor.blue,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColor.gray),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColor.gray),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: AppColor.blue,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: widget.onQuantityChanged,
-                    ),
+                const SizedBox(width: 8),
+
+                Expanded(
+                  child: TextField(
+                    controller: _priceController,
+                    readOnly: widget.selectedProduct != 'Others Items',
+                    onChanged: (value) {
+                      widget.onPriceChanged(value);
+                    },
+                    decoration: _buildInputDecoration('Price'),
                   ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _priceController,
-                      decoration: InputDecoration(
-                        labelText: 'Price',
-                        labelStyle: TextStyle(
-                          color: AppColor.black,
-                          fontSize: 14,
-                        ),
-                        focusColor: AppColor.blue,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColor.gray),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColor.gray),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: AppColor.blue,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,2}'),
-                        ),
-                      ],
-                      onChanged: widget.onPriceChanged,
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Amount: ₹${amount.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    'Amount: ₹${((widget.spareBox['quantity'] ?? 0) * (widget.spareBox['price'] ?? 0.0)).toStringAsFixed(2)}',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ],
-              ),
-            ]
-          ),
+            ),
+          ],
         ),
       ),
     );

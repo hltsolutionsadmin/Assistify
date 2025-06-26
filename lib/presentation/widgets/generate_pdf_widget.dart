@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:assistify/presentation/widgets/date_converter_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 
-Future<pw.Document> generatePdf(title, data, spares, bannerImage, context, category) async {
+Future<pw.Document> generatePdf(title, data, spares, bannerImage, context, category, companyName) async {
   final pdf = pw.Document();
   Uint8List? bytes;
   
@@ -31,6 +32,11 @@ Future<pw.Document> generatePdf(title, data, spares, bannerImage, context, categ
                 height: 150,
                 width: 500,
               ),
+              if(bytes == null)
+              pw.Center(
+                child: pw.Text(companyName ?? '', style: pw.TextStyle(fontSize: 32, color: PdfColors.black))
+              ),
+                          pw.SizedBox(height: 20),
             pw.Center(
               child: pw.Text(
                 title ?? '',
@@ -71,7 +77,7 @@ Future<pw.Document> generatePdf(title, data, spares, bannerImage, context, categ
                     ),
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [pw.Text('Date:'), pw.Text('sept-25-2024')],
+                      children: [pw.Text('Date:'), pw.Text(formatDate(data?.createdAt ?? ''))],
                     ),
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
