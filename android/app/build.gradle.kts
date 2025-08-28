@@ -7,6 +7,8 @@ plugins {
 
 android {
     namespace = "jr.assistify.starter"
+
+    // These will now come from gradle.properties (API 35)
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -25,11 +27,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-    } 
+    }
 
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
+            // For production builds, replace with your actual release signing config
         }
     }
 }
