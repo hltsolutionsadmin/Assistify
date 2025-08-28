@@ -13,17 +13,37 @@ import 'package:assistify/presentation/screen/splash/splash_screen.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart'; // ✅ Added
 import 'core/injection.dart' as di;
+
+/// ✅ Request Bluetooth + Location permissions
+Future<void> requestPermissions() async {
+  if (await Permission.bluetoothScan.isDenied) {
+    await Permission.bluetoothScan.request();
+  }
+  if (await Permission.bluetoothConnect.isDenied) {
+    await Permission.bluetoothConnect.request();
+  }
+  if (await Permission.location.isDenied) {
+    await Permission.location.request();
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   di.init();
+
+  /// ✅ Ask permissions before running the app
+  await requestPermissions();
+
   final connectivityResult = await Connectivity().checkConnectivity();
   if (connectivityResult == ConnectivityResult.none) {
     print("No Internet Connection");
   } else {
     print("Connected to the Internet");
   }
+
   runApp(const MyApp());
 }
 
@@ -36,7 +56,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
-  Widget build(BuildContextcontext) {
+  Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => di.sl<LoginCubit>()),
@@ -51,7 +71,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => di.sl<SearchPhoneNumberCubit>()),
       ],
       child: MaterialApp(
-        title: 'Assitify',
+        title: 'Assistify',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.green,

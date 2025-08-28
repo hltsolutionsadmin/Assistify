@@ -17,9 +17,11 @@ class UserProfileDataSourceImpl implements UserProfileDatasource {
 
   @override
   Future<UserProfileModel> user_Profile(String companyId) async {
+    print(companyId.runtimeType);
     try {
-      final response = await client.get('$userProfile/$companyId');
-      print('Response status code of user_Profile: ${response.statusCode}');
+      print('Response status code of user_Profile: $companyId $userProfile');
+      final response = await client.get('$userProfile$companyId');
+      print(response.statusCode);
       if (response.statusCode == 200) {
         print('Response data user_Profile: ${response.data}');
 
@@ -31,6 +33,7 @@ class UserProfileDataSourceImpl implements UserProfileDatasource {
         throw Exception('Failed to load user_Profile: ${response.statusCode}');
       }
     } catch (e) {
+      print(e);
       throw Exception('Failed to load user_Profile: ${e.toString()}');
     }
   }
