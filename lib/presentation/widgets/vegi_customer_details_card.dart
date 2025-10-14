@@ -12,6 +12,7 @@ class VegiCustomerDetailsCard extends StatefulWidget {
   final dynamic custData;
   final Function? fetchData;
   String? companyName;
+  String? companyPhone;
   num? category;
   VegiCustomerDetailsCard({
     super.key,
@@ -19,6 +20,7 @@ class VegiCustomerDetailsCard extends StatefulWidget {
     this.fetchData,
     this.companyName,
     this.category,
+    this.companyPhone,
   });
 
   @override
@@ -30,6 +32,7 @@ class _JobCardState extends State<VegiCustomerDetailsCard> {
 
   @override
   Widget build(BuildContext context) {
+    print(' companyPhone: ${widget.companyPhone}');
     return Card(
       margin: const EdgeInsets.all(12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -80,6 +83,7 @@ class _JobCardState extends State<VegiCustomerDetailsCard> {
                                   title: 'Edit Details',
                                   companyName: widget.companyName,
                                   category: widget.category,
+                                  companyPhone: widget.companyPhone,
                                 ),
                           ),
                         ).then((_) {
@@ -101,6 +105,7 @@ class _JobCardState extends State<VegiCustomerDetailsCard> {
                                       data: widget.custData,
                                       category: widget.category,
                                       companyName: widget.companyName,
+                                      companyPhone: widget.companyPhone,
                                     ),
                               ),
                             ).then((_) {

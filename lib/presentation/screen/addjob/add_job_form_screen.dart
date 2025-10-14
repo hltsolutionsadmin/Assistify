@@ -10,7 +10,7 @@ import 'package:assistify/presentation/cubit/dashboard/all_bills/all_bills_state
 import 'package:assistify/presentation/cubit/dashboard/save_bill/save_bill_cubit.dart';
 import 'package:assistify/presentation/widgets/add-job_form_screen_widgets.dart/section_header.dart';
 import 'package:assistify/presentation/widgets/add-job_form_screen_widgets.dart/custom_drop_down_field.dart';
-import 'package:assistify/presentation/widgets/add-job_form_screen_widgets.dart/spare_box.dart'; // Ensure this is imported
+import 'package:assistify/presentation/widgets/add-job_form_screen_widgets.dart/spare_box.dart';
 import 'package:assistify/presentation/widgets/helper_widgets.dart/button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +21,9 @@ class AddJobFormScreen extends StatefulWidget {
   final dynamic jobData;
   final String? title;
   final String? companyName;
-  const AddJobFormScreen({Key? key, this.jobData, this.title, this.companyName})
+    final String? companyPhone;
+
+  const AddJobFormScreen({Key? key, this.jobData, this.title, this.companyName, this.companyPhone})
     : super(key: key);
 
   @override
@@ -884,6 +886,7 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
                           "billSpares": billSpares,
                         },
                         widget.companyName.toString(),
+                        widget.companyPhone.toString(),
                         0,
                       );
 

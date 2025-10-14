@@ -14,6 +14,7 @@ class JobCard extends StatefulWidget {
   num? category;
   String? logo;
   String? banner;
+  String? companyPhone;
   JobCard({
     super.key,
     required this.jobData,
@@ -22,6 +23,7 @@ class JobCard extends StatefulWidget {
     this.category,
     this.banner,
     this.logo,
+    this.companyPhone,
   });
 
   @override
@@ -102,7 +104,9 @@ class _JobCardState extends State<JobCard> {
                               0,
                               widget.companyName,
                               widget.banner, 
-                              widget.logo
+                              widget.logo,
+                              widget.companyPhone,
+
                             ),
                           },
                       child: Icon(Icons.description, size: 24),

@@ -6,6 +6,7 @@ import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile
 import 'package:assistify/presentation/screen/addjob/add_form.dart';
 import 'package:assistify/presentation/screen/addjob/add_job_form_screen.dart';
 import 'package:assistify/presentation/screen/dashboard/dashboard_functions_widget.dart';
+import 'package:assistify/presentation/screen/login/login_screen.dart';
 import 'package:assistify/presentation/widgets/dash_board_helper_widget.dart';
 import 'package:assistify/presentation/widgets/filter_option_view_widget.dart';
 import 'package:assistify/presentation/widgets/job_card_widget.dart';
@@ -35,6 +36,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   String companyName = '';
   String banner = '';
   String logo = '';
+  String companyPhone = '';
   Map<String, dynamic>? filterData;
   num categoryId = 0;
   int _pageNumber = 1;
@@ -52,18 +54,29 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
     _checkForUpdate();
   }
 
-  Future<void> _checkForUpdate() async {
-    try {
-      final updateInfo = await InAppUpdate.checkForUpdate();
-      if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
-        if (updateInfo.immediateUpdateAllowed) {
-          await InAppUpdate.performImmediateUpdate();
-        } else if (updateInfo.flexibleUpdateAllowed) {
-          await InAppUpdate.startFlexibleUpdate();
-          await InAppUpdate.completeFlexibleUpdate();
-        }
-      }
-    } catch (_) {}
+Future<void> _checkForUpdate() async {
+    print('checking for update');
+    await InAppUpdate.checkForUpdate().then((info) {
+setState(() {
+  if(info.updateAvailability == UpdateAvailability.updateAvailable){
+    print('update available');
+    update();
+  }
+});
+    }).catchError((e) {
+      print('error in update');
+      print(e.toString());
+    });
+      
+    
+  }
+
+  void update() async {
+    print('Updating');
+    await InAppUpdate.startFlexibleUpdate();
+    InAppUpdate.completeFlexibleUpdate().then((_) {}).catchError((error) {
+      print(error.toString());
+    });
   }
 
   Future<void> _initializeData() async {
@@ -107,13 +120,31 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
     await context.read<UserProfileCubit>().userProfile(context, companyId);
     final state = context.read<UserProfileCubit>().state;
     if (state is UserProfileLoaded) {
+      print(
+        'state.userProfileModel.data--${state.userProfileModel.data?.phoneNumber}',
+      );
       setState(() {
         companyName = state.userProfileModel.data?.name ?? 'No Name';
         categoryId = state.userProfileModel.data?.categoryId ?? 0;
         banner = state.userProfileModel.data?.bannerImage ?? '';
         logo = state.userProfileModel.data?.logo ?? '';
+        companyPhone = state.userProfileModel.data?.phoneNumber ?? '';
         _isDrawerDataLoaded = true;
       });
+    } else if (state is UserProfileError) {
+      SharedPreferences prefs;
+      prefs = await SharedPreferences.getInstance();
+      prefs.setString('TOKEN', '');
+      prefs.setString("email", '');
+      prefs.setString("userId", '');
+      prefs.setString("companyId", '');
+      prefs.setString("firstName", '');
+      prefs.setString("lastName", '');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+        (_) => false,
+      );
     }
   }
 
@@ -244,8 +275,12 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                             ? AddFormScreen(
                               companyName: companyName,
                               category: categoryId,
+                              companyPhone: companyPhone,
                             )
-                            : AddJobFormScreen(companyName: companyName),
+                            : AddJobFormScreen(
+                              companyName: companyName,
+                              companyPhone: companyPhone,
+                            ),
               ),
             );
           },
@@ -325,6 +360,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                                       custData: bills[i],
                                       category: categoryId,
                                       fetchData: _fetchAllBills,
+                                      companyPhone: companyPhone,
                                     )
                                     : JobCard(
                                       jobData: bills[i],
@@ -332,6 +368,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                                       category: categoryId,
                                       logo: logo,
                                       banner: banner,
+                                      companyPhone: companyPhone,
                                     );
                               },
                             );
@@ -368,6 +405,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                                           fetchData: _fetchAllBills,
                                           companyName: companyName,
                                           category: categoryId,
+                                          companyPhone: companyPhone,
                                         ),
                                       )
                                       : InkWell(

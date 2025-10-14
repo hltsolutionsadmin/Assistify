@@ -23,12 +23,14 @@ class PrintingCard extends StatefulWidget {
   final dynamic data;
   final num? category;
   final String? companyName;
+  final String? companyPhone;
   const PrintingCard({
     super.key,
     this.title,
     required this.data,
     this.category,
     this.companyName,
+    this.companyPhone,
   });
 
   @override
@@ -43,6 +45,7 @@ class _PrintingCardState extends State<PrintingCard> {
   @override
   void initState() {
     super.initState();
+    print('widget.companyPhone--${widget.companyPhone}');
     _loadUserBanner();
     context.read<AllBillsCubit>().spareBills(
       context: context,
@@ -63,6 +66,7 @@ class _PrintingCardState extends State<PrintingCard> {
   }
 
   Future<void> _handlePrintAction() async {
+        print('${widget.category}, ${widget.companyName}--$spareBills--${ widget.data}--${widget.companyName}');
     final pdf = await generatePdf(
       widget.title,
       widget.data,
@@ -72,6 +76,7 @@ class _PrintingCardState extends State<PrintingCard> {
       widget.category,
       widget.companyName
     );
+
     final bytes = await pdf.save();
 
     showModalBottomSheet(
@@ -179,7 +184,9 @@ class _PrintingCardState extends State<PrintingCard> {
                             buildButton(
                               text: "Share",
                               icon: Icons.share,
-                              handleAction: _handlePrintAction,
+                              handleAction: (){
+                                _handlePrintAction();
+                              },
                             ),
                             buildButton(
                               text: "Print",
@@ -194,6 +201,7 @@ class _PrintingCardState extends State<PrintingCard> {
                                         category: widget.category,
                                         spares: spareBills,
                                         logo: logo,
+                                        companyPhone: widget.companyPhone,
                                       ),
                                 );
                               },
