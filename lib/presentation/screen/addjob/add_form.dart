@@ -7,7 +7,8 @@ class AddFormScreen extends StatefulWidget {
   num? category;
 final dynamic jobData;
   String? companyName;
-  AddFormScreen({Key? key, this.companyName, this.category, this.jobData})
+  String? companyPhone;
+  AddFormScreen({Key? key, this.companyName, this.category, this.jobData, this.companyPhone})
     : super(key: key);
   @override
   _AddFormScreenState createState() => _AddFormScreenState();
@@ -25,7 +26,7 @@ class _AddFormScreenState extends State<AddFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.white,
-      body: widget.category == 2 ? AddItemsScreen(companyName:widget.companyName, category: widget.category,) : AddJobFormScreen(
+      body: widget.category == 2 ? AddItemsScreen(companyName:widget.companyName, category: widget.category, companyPhone: widget.companyPhone, ) : AddJobFormScreen(
         // companyName: widget.companyName,
         //  jobData: widget.jobData,
       ),

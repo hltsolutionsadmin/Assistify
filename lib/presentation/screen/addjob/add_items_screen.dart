@@ -25,6 +25,7 @@ class AddItemsScreen extends StatefulWidget {
   String? title;
   String? companyName;
   num? category;
+  String? companyPhone;
 
   AddItemsScreen({
     Key? key,
@@ -32,6 +33,7 @@ class AddItemsScreen extends StatefulWidget {
     this.title,
     this.companyName,
     this.category,
+    this.companyPhone
   }) : super(key: key);
 
   @override
@@ -74,6 +76,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
   void initState() {
     super.initState();
     _fetchData();
+    print('company mobile: ${widget.companyPhone}');
     _updateBalanceAmount();
     _paidAmountController.addListener(_updateBalanceAmount);
     // final state = context.read<
@@ -741,7 +744,9 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                                 "billSpares": billSpares,
                               },
                               widget.companyName.toString(),
+                              widget.companyPhone.toString(),
                               widget.category,
+
                             );
                           } finally {
                             if (mounted) {

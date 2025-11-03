@@ -16,6 +16,7 @@ class PrintScreen extends StatefulWidget {
   final num? category;
   final List<dynamic>? spares;
   final String? logo;
+  final String? companyPhone;
 
   const PrintScreen({
     Key? key,
@@ -24,6 +25,7 @@ class PrintScreen extends StatefulWidget {
     this.category,
     this.spares,
     this.logo,
+    this.companyPhone
   }) : super(key: key);
 
   @override
@@ -48,6 +50,7 @@ class _PrintScreenState extends State<PrintScreen> {
   @override
   void initState() {
     super.initState();
+    print(widget.companyPhone);
     if (widget.logo?.isNotEmpty == true) {
       try {
         final base64String =
@@ -257,7 +260,7 @@ class _PrintScreenState extends State<PrintScreen> {
 
       receiptText += '\nThanks & Regards\n';
       if (widget.companyName != null) receiptText += '${widget.companyName}\n';
-      receiptText += '${data.phoneNumber ?? ''}\n\n';
+      receiptText += '${widget.companyPhone ?? ''}\n\n';
 
       final textBytes = utf8.encode(receiptText);
       const mtu = 182;
@@ -386,7 +389,7 @@ class _PrintScreenState extends State<PrintScreen> {
                 ),
               ),
             Text(
-              data.phoneNumber?.toString() ?? '',
+              widget.companyPhone?.toString() ?? '',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 10),

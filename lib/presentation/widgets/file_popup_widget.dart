@@ -9,6 +9,7 @@ void showFilePopup(
   String? companyName,
   String? banner,
   String? logo,
+  String? companyPhone,
 ) {
   showDialog(
     context: context,
@@ -59,6 +60,7 @@ void showFilePopup(
                             data: data,
                             category: category,
                             companyName: companyName,
+                            companyPhone: companyPhone,
                           ),
                     ),
                   ).then((_) {

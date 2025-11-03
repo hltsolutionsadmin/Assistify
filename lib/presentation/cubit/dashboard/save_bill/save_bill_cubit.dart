@@ -19,6 +19,7 @@ class SaveBillCubit extends Cubit<SaveBillState> {
     BuildContext context,
     dynamic body,
     String companyName,
+    String? phoneNumber,
     num? category,
   ) async {
     print(body);
@@ -40,7 +41,7 @@ class SaveBillCubit extends Cubit<SaveBillState> {
       print(saveBillEntity);
       if (saveBillEntity.status == 'SUCCESS') {
         final jobId = saveBillEntity.data?.bill![0].jobId;
-        _launchWhatsApp(context, body, companyName, category, jobId);
+        _launchWhatsApp(context, body, companyName, category, jobId, phoneNumber);
                Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => DashBoardScreen()),
@@ -66,9 +67,9 @@ class SaveBillCubit extends Cubit<SaveBillState> {
     }
   }
 
-  Future<void> _launchWhatsApp(context, body, companyName, category, jobId) async {
+  Future<void> _launchWhatsApp(context, body, companyName, category, jobId, phoneNumber) async {
     String phone = body['phoneNumber'] ?? '';
-    print('phone: $phone');
+    print('phoneNumber--: $phoneNumber');
 
     String message1 = ''' 
 Hello *${body['customerName']}*
@@ -80,7 +81,7 @@ Status: *${body['status']}*
 
 Thanks & Regards
 *${companyName}*
-*$phone*
+*${phoneNumber}*
     ''';
     String itemDetails = '';
     if (body['billSpares'] != null) {
@@ -99,7 +100,7 @@ TotalAmount: *₹${body['totalAmount']}*
 
 Thanks & Regards
 *$companyName*
-*$phone*
+*$phoneNumber*
     ''';
 
     final url =
