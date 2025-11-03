@@ -12,6 +12,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ExpencesScreen extends StatefulWidget {
+  const ExpencesScreen({super.key});
+
   @override
   State<ExpencesScreen> createState() => _ExpencesScreenState();
 }
@@ -139,7 +141,7 @@ class ExpenseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      final DateFormat _dateFormat = DateFormat('dd MMM yyyy');
+      final DateFormat dateFormat = DateFormat('dd MMM yyyy');
 
     return Card(
       elevation: 4,
@@ -216,7 +218,7 @@ class ExpenseCard extends StatelessWidget {
                           text: 'Price: ',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        TextSpan(text: '\₹ ${expense.amount}'),
+                        TextSpan(text: '₹ ${expense.amount}'),
                       ],
                     ),
                   ),
@@ -229,7 +231,7 @@ class ExpenseCard extends StatelessWidget {
                           text: 'Created Date: ',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        TextSpan(text: expense.expenseDate != null ? _dateFormat.format(DateTime.parse(expense.expenseDate.toString())) ?? '' : ''),
+                        TextSpan(text: expense.expenseDate != null ? dateFormat.format(DateTime.parse(expense.expenseDate.toString())) ?? '' : ''),
                       ],
                     ),
                   ),

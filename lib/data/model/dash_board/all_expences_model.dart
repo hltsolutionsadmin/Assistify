@@ -11,15 +11,15 @@ class AllExpencesModel {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(Data.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -68,18 +68,18 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['expenseDate'] = this.expenseDate;
-    data['description'] = this.description;
-    data['category'] = this.category;
-    data['amount'] = this.amount;
-    data['paymentMode'] = this.paymentMode;
-    data['referenceNumber'] = this.referenceNumber;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['userId'] = this.userId;
-    data['companyId'] = this.companyId;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['expenseDate'] = expenseDate;
+    data['description'] = description;
+    data['category'] = category;
+    data['amount'] = amount;
+    data['paymentMode'] = paymentMode;
+    data['referenceNumber'] = referenceNumber;
+    data['createdAt'] = createdAt;
+    data['updatedAt'] = updatedAt;
+    data['userId'] = userId;
+    data['companyId'] = companyId;
     return data;
   }
 }

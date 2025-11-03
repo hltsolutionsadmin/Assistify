@@ -11,9 +11,9 @@ class BluetoothPrint {
   static const int DISCONNECTED = 0;
 
   static const MethodChannel _channel =
-      const MethodChannel('$NAMESPACE/methods');
+      MethodChannel('$NAMESPACE/methods');
   static const EventChannel _stateChannel =
-      const EventChannel('$NAMESPACE/state');
+      EventChannel('$NAMESPACE/state');
 
   Stream<MethodCall> get _methodStream => _methodStreamController.stream;
   final StreamController<MethodCall> _methodStreamController =
@@ -25,7 +25,7 @@ class BluetoothPrint {
     });
   }
 
-  static BluetoothPrint _instance = new BluetoothPrint._();
+  static final BluetoothPrint _instance = BluetoothPrint._();
 
   static BluetoothPrint get instance => _instance;
 
@@ -38,16 +38,16 @@ class BluetoothPrint {
   Future<bool?> get isConnected async =>
       await _channel.invokeMethod('isConnected');
 
-  BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
 
   Stream<bool> get isScanning => _isScanning.stream;
 
-  BehaviorSubject<List<BluetoothDevice>> _scanResults =
+  final BehaviorSubject<List<BluetoothDevice>> _scanResults =
       BehaviorSubject.seeded([]);
 
   Stream<List<BluetoothDevice>> get scanResults => _scanResults.stream;
 
-  PublishSubject _stopScanPill = new PublishSubject();
+  final PublishSubject _stopScanPill = PublishSubject();
 
   /// Gets the current state of the Bluetooth module
   Stream<int> get state async* {
@@ -83,7 +83,7 @@ class BluetoothPrint {
       print('Error starting scan.');
       _stopScanPill.add(null);
       _isScanning.add(false);
-      throw e;
+      rethrow;
     }
 
     yield* BluetoothPrint.instance._methodStream
@@ -134,7 +134,7 @@ class BluetoothPrint {
 
   Future<dynamic> printReceipt(
       Map<String, dynamic> config, List<LineText> data) {
-    Map<String, Object> args = Map();
+    Map<String, Object> args = {};
     args['config'] = config;
     args['data'] = data.map((m) {
       return m.toJson();
@@ -145,7 +145,7 @@ class BluetoothPrint {
   }
 
   Future<dynamic> printLabel(Map<String, dynamic> config, List<LineText> data) {
-    Map<String, Object> args = Map();
+    Map<String, Object> args = {};
     args['config'] = config;
     args['data'] = data.map((m) {
       return m.toJson();

@@ -18,7 +18,7 @@ class SpareBox extends StatefulWidget {
   final String? prodId;
 
   const SpareBox({
-    Key? key,
+    super.key,
     required this.index,
     required this.spareBox,
     required this.onNameChanged,
@@ -31,7 +31,7 @@ class SpareBox extends StatefulWidget {
     required this.showOtherItemsFields,
     required this.maxQuantity,
     this.prodId,
-  }) : super(key: key);
+  });
 
   @override
   State<SpareBox> createState() => _SpareBoxState();

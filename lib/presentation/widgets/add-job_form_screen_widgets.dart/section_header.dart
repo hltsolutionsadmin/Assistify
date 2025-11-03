@@ -5,7 +5,7 @@ class SectionHeader extends StatelessWidget {
   final IconData icon;
   final String title;
 
-  const SectionHeader(this.icon, this.title);
+  const SectionHeader(this.icon, this.title, {super.key});
 
   @override
   Widget build(BuildContext context) {

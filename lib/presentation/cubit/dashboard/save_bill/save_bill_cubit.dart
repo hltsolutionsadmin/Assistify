@@ -80,8 +80,8 @@ Job/OrderId: *$jobId*
 Status: *${body['status']}*
 
 Thanks & Regards
-*${companyName}*
-*${phoneNumber}*
+*$companyName*
+*$phoneNumber*
     ''';
     String itemDetails = '';
     if (body['billSpares'] != null) {

@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -115,7 +117,6 @@ class _MyAppState extends State<MyApp> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             OutlinedButton(
-                              child: Text('connect'),
                               onPressed:  _connected?null:() async {
                                 if(_device!=null && _device!.address !=null){
                                   setState(() {
@@ -129,24 +130,24 @@ class _MyAppState extends State<MyApp> {
                                   print('please select device');
                                 }
                               },
+                              child: Text('connect'),
                             ),
                             SizedBox(width: 10.0),
                             OutlinedButton(
-                              child: Text('disconnect'),
                               onPressed:  _connected?() async {
                                 setState(() {
                                   tips = 'disconnecting...';
                                 });
                                 await bluetoothPrint.disconnect();
                               }:null,
+                              child: Text('disconnect'),
                             ),
                           ],
                         ),
                         Divider(),
                         OutlinedButton(
-                          child: Text('print receipt(esc)'),
                           onPressed:  _connected?() async {
-                            Map<String, dynamic> config = Map();
+                            Map<String, dynamic> config = {};
 
                             List<LineText> list = [];
 
@@ -173,11 +174,11 @@ class _MyAppState extends State<MyApp> {
 
                             await bluetoothPrint.printReceipt(config, list);
                           }:null,
+                          child: Text('print receipt(esc)'),
                         ),
                         OutlinedButton(
-                          child: Text('print label(tsc)'),
                           onPressed:  _connected?() async {
-                            Map<String, dynamic> config = Map();
+                            Map<String, dynamic> config = {};
                             config['width'] = 40; // 标签宽度，单位mm
                             config['height'] = 70; // 标签高度，单位mm
                             config['gap'] = 2; // 标签间隔，单位mm
@@ -198,12 +199,13 @@ class _MyAppState extends State<MyApp> {
                             await bluetoothPrint.printLabel(config, list);
                             await bluetoothPrint.printLabel(config, list1);
                           }:null,
+                          child: Text('print label(tsc)'),
                         ),
                         OutlinedButton(
-                          child: Text('print selftest'),
                           onPressed:  _connected?() async {
                             await bluetoothPrint.printTest();
                           }:null,
+                          child: Text('print selftest'),
                         )
                       ],
                     ),
@@ -218,9 +220,9 @@ class _MyAppState extends State<MyApp> {
           builder: (c, snapshot) {
             if (snapshot.data == true) {
               return FloatingActionButton(
-                child: Icon(Icons.stop),
                 onPressed: () => bluetoothPrint.stopScan(),
                 backgroundColor: Colors.red,
+                child: Icon(Icons.stop),
               );
             } else {
               return FloatingActionButton(

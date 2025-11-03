@@ -18,14 +18,14 @@ class SettingsScreen extends StatefulWidget {
   final String? companyId;
 
   const SettingsScreen({
-    Key? key,
+    super.key,
     this.address,
     this.logo,
     this.phoneNumber,
     this.jobIdFormat,
     this.termsAndConditions,
     this.companyId,
-  }) : super(key: key);
+  });
 
   @override
   State<SettingsScreen> createState() => _SettingsViewState();

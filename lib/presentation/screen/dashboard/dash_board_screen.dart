@@ -18,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 
 class DashBoardScreen extends StatefulWidget {
-  const DashBoardScreen({Key? key}) : super(key: key);
+  const DashBoardScreen({super.key});
 
   @override
   State<DashBoardScreen> createState() => _DashBoardScreenState();
@@ -30,7 +30,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _refreshKey = GlobalKey<RefreshIndicatorState>();
   final _searchController = TextEditingController();
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
   String userId = '';
   String companyId = '';
   String companyName = '';
@@ -42,7 +42,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   int _pageNumber = 1;
   final int _pageSize = 10;
   bool _isFetchingMore = false;
-  bool _hasMore = true;
+  final bool _hasMore = true;
   bool isRefresh = false;
   bool _isDrawerDataLoaded = false;
 
@@ -223,7 +223,7 @@ setState(() {
                         context: context,
                         isScrollControlled: true,
                         builder:
-                            (context) => Container(
+                            (context) => SizedBox(
                               height: MediaQuery.of(context).size.height * 0.9,
                               child: FilterOptionsView(
                                 companyId: companyId,

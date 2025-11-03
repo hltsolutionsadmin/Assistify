@@ -2,7 +2,6 @@ import 'package:assistify/core/constants/custome_snack_bar.dart';
 import 'package:assistify/domain/usecase/add_products/add_products_useCase.dart';
 import 'package:assistify/presentation/cubit/add_products/add_products_state.dart';
 import 'package:assistify/presentation/cubit/dashboard/inventory_products/inventory_produts_cubit.dart';
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

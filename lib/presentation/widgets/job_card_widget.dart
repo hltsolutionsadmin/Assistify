@@ -3,7 +3,6 @@ import 'package:assistify/presentation/screen/addjob/add_job_form_screen.dart';
 import 'package:assistify/presentation/widgets/contact_popup_widget.dart';
 import 'package:assistify/presentation/widgets/file_popup_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 // ignore: must_be_immutable
