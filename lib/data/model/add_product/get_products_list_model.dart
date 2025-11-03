@@ -11,15 +11,15 @@ class GetProductsListModel {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(Data.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -62,16 +62,16 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['productName'] = this.productName;
-    data['price'] = this.price;
-    data['quantity'] = this.quantity;
-    data['description'] = this.description;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['userId'] = this.userId;
-    data['companyId'] = this.companyId;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['productName'] = productName;
+    data['price'] = price;
+    data['quantity'] = quantity;
+    data['description'] = description;
+    data['createdAt'] = createdAt;
+    data['updatedAt'] = updatedAt;
+    data['userId'] = userId;
+    data['companyId'] = companyId;
     return data;
   }
 }

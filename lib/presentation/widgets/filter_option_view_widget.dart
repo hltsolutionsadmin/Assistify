@@ -19,7 +19,7 @@ class FilterOptionsView extends StatefulWidget {
   final void Function(bool)? onFilter;
 
   const FilterOptionsView({
-    Key? key,
+    super.key,
     this.companyId,
     this.userId,
     this.initialName,
@@ -30,7 +30,7 @@ class FilterOptionsView extends StatefulWidget {
     this.fetchData,
     this.onRefresh,
     this.onFilter,
-  }) : super(key: key);
+  });
 
   @override
   State<FilterOptionsView> createState() => _FilterOptionsViewState();

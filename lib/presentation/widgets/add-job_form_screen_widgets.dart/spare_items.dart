@@ -11,14 +11,15 @@ class SpareItemsBox extends StatefulWidget {
   final ValueChanged<String> onQuantityChanged;
   final ValueChanged<String> onPriceChanged;
   final VoidCallback onDelete;
-  final VoidCallback onSelectProductTap;
+  final Future<Map<String, dynamic>?> Function()
+  onSelectProductTap; // 👈 updated to return selected item
   final String? selectedProduct;
   final bool showOtherItemsFields;
   final int maxQuantity;
   final String? prodId;
 
   const SpareItemsBox({
-    Key? key,
+    super.key,
     required this.index,
     required this.spareBox,
     required this.onNameChanged,
@@ -31,13 +32,13 @@ class SpareItemsBox extends StatefulWidget {
     required this.showOtherItemsFields,
     required this.maxQuantity,
     this.prodId,
-  }) : super(key: key);
+  });
 
   @override
-  State<SpareItemsBox> createState() => _SpareBoxState();
+  State<SpareItemsBox> createState() => _SpareItemsBoxState();
 }
 
-class _SpareBoxState extends State<SpareItemsBox> {
+class _SpareItemsBoxState extends State<SpareItemsBox> {
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _quantityController;
@@ -68,47 +69,49 @@ class _SpareBoxState extends State<SpareItemsBox> {
   }
 
   @override
-void didUpdateWidget(covariant SpareItemsBox oldWidget) {
-  print(widget.spareBox['name']);
-  super.didUpdateWidget(oldWidget);
+  void didUpdateWidget(covariant SpareItemsBox oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-  _conditionallyUpdateControllerText(
-    _nameController,
-    widget.spareBox['name'] == 'Others Items' ? '' : widget.spareBox['name']  ?? '',
-  );
+    _conditionallyUpdateControllerText(
+      _nameController,
+      widget.spareBox['name'] == 'Others Items'
+          ? ''
+          : widget.spareBox['name'] ?? '',
+    );
 
-  _conditionallyUpdateControllerText(
-    _descriptionController,
-    widget.spareBox['description'] ?? '',
-  );
+    _conditionallyUpdateControllerText(
+      _descriptionController,
+      widget.spareBox['description'] ?? '',
+    );
+    _conditionallyUpdateControllerText(
+      _quantityController,
+      (widget.spareBox['quantity'] == null || widget.spareBox['quantity'] == 0)
+          ? ''
+          : widget.spareBox['quantity'].toString(),
+    );
 
-  _conditionallyUpdateControllerText(
-    _quantityController,
-    (widget.spareBox['quantity'] == null || widget.spareBox['quantity'] == 0)
-        ? ''
-        : widget.spareBox['quantity'].toString(),
-  );
+    _conditionallyUpdateControllerText(
+      _priceController,
+      (widget.spareBox['price'] == null || widget.spareBox['price'] == 0.0)
+          ? ''
+          : widget.spareBox['price'].toString(),
+    );
+  }
 
-  _conditionallyUpdateControllerText(
-    _priceController,
-    (widget.spareBox['price'] == null || widget.spareBox['price'] == 0.0)
-        ? ''
-        : widget.spareBox['price'].toString(),
-  );
-}
-
-
-void _conditionallyUpdateControllerText(TextEditingController controller, String newText) {
-  if (controller.text != newText) {
-    final cursorPosition = controller.selection.baseOffset;
-    controller.text = newText;
-    if (cursorPosition >= 0 && cursorPosition <= newText.length) {
-      controller.selection = TextSelection.fromPosition(
-        TextPosition(offset: cursorPosition),
-      );
+  void _conditionallyUpdateControllerText(
+    TextEditingController controller,
+    String newText,
+  ) {
+    if (controller.text != newText) {
+      final cursorPosition = controller.selection.baseOffset;
+      controller.text = newText;
+      if (cursorPosition >= 0 && cursorPosition <= newText.length) {
+        controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: cursorPosition),
+        );
+      }
     }
   }
-}
 
   InputDecoration _buildInputDecoration(String label) => InputDecoration(
     labelText: label,
@@ -136,6 +139,7 @@ void _conditionallyUpdateControllerText(TextEditingController controller, String
   Widget build(BuildContext context) {
     final double amount =
         (widget.spareBox['quantity'] ?? 0) * (widget.spareBox['price'] ?? 0.0);
+
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 16),
@@ -154,7 +158,26 @@ void _conditionallyUpdateControllerText(TextEditingController controller, String
             CustomDropdownField(
               hintText: 'Select Item',
               selectedValue: widget.selectedProduct,
-              onTap: widget.onSelectProductTap,
+              onTap: () async {
+                final selectedItem = await widget.onSelectProductTap();
+                if (selectedItem != null) {
+                  setState(() {
+                    widget.spareBox['name'] = selectedItem['name'];
+                    widget.spareBox['price'] = selectedItem['price'];
+                  });
+                  _conditionallyUpdateControllerText(
+                    _nameController,
+                    selectedItem['name'] ?? '',
+                  );
+                  _conditionallyUpdateControllerText(
+                    _priceController,
+                    selectedItem['price'].toString(),
+                  );
+
+                  widget.onNameChanged(selectedItem['name'] ?? '');
+                  widget.onPriceChanged(selectedItem['price'].toString());
+                }
+              },
             ),
             if (widget.showOtherItemsFields) ...[
               const SizedBox(height: 12),
@@ -220,20 +243,20 @@ void _conditionallyUpdateControllerText(TextEditingController controller, String
                   ),
                 ),
                 const SizedBox(width: 8),
-
                 Expanded(
                   child: TextField(
                     controller: _priceController,
-                    readOnly: widget.selectedProduct != 'Others Items',
-                    onChanged: (value) {
-                      widget.onPriceChanged(value);
-                    },
+                    readOnly:
+                        widget.selectedProduct == null ||
+                                widget.selectedProduct!.isEmpty
+                            ? true
+                            : false, // ✅ editable once product selected
+                    onChanged: widget.onPriceChanged,
                     decoration: _buildInputDecoration('Price'),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerLeft,

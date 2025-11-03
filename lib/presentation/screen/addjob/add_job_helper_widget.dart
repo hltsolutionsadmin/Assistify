@@ -43,8 +43,8 @@ void ShowPaymentDialog({context, paymentMode, onPressed}) {
               },
             ),
             TextButton(
-              child: Text('OK'),
               onPressed: onPressed,
+              child: Text('OK'),
             ),
           ],
         );
@@ -95,8 +95,8 @@ void ShowPaymentDialog({context, paymentMode, onPressed}) {
               },
             ),
             TextButton(
-              child: Text('OK', style: TextStyle(color: AppColor.blue)),
               onPressed: onPressed,
+              child: Text('OK', style: TextStyle(color: AppColor.blue)),
             ),
           ],
         );

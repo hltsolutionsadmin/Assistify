@@ -19,12 +19,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _productNameController = TextEditingController();
   final TextEditingController _productPriceController = TextEditingController();
+  final TextEditingController _companyNameController = TextEditingController();
   final TextEditingController _productQuantityController = TextEditingController();
   final TextEditingController _productDescriptionController = TextEditingController();
   
   bool errorName = false;
   bool errorPrice = false;
   bool errorQuantity = false;
+  bool errorCompany = false;
   bool errorDescription = false;
   String userId = '';
   String companyId = '';
@@ -46,6 +48,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     if (isEditMode && widget.data != null) {
       _productNameController.text = widget.data.productName ?? '';
       _productPriceController.text = widget.data.price?.toString() ?? '';
+      _companyNameController.text = widget.data.companyName ?? '';
       _productQuantityController.text = widget.data.quantity?.toString() ?? '';
       _productDescriptionController.text = widget.data.description ?? '';
     }
@@ -56,6 +59,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     _productNameController.dispose();
     _productPriceController.dispose();
     _productQuantityController.dispose();
+    _companyNameController.dispose();
     _productDescriptionController.dispose();
     super.dispose();
   }
@@ -65,10 +69,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
       isLoading = true;
       errorName = _productNameController.text.isEmpty;
       errorPrice = _productPriceController.text.isEmpty;
+      errorCompany = _companyNameController.text.isEmpty;
       errorQuantity = _productQuantityController.text.isEmpty;
     });
 
-    if (errorName || errorPrice || errorQuantity) {
+    if (errorName || errorPrice || errorQuantity || errorCompany) {
       setState(() => isLoading = false);
       return;
     }
@@ -77,6 +82,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       "productName": _productNameController.text,
       "price": _productPriceController.text,
       "quantity": _productQuantityController.text,
+      "companyName": _companyNameController.text,
       "description": _productDescriptionController.text,
       "userId": userId,
       "companyId": companyId,
@@ -86,6 +92,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       "productName": _productNameController.text,
       "price": _productPriceController.text,
       "quantity": _productQuantityController.text,
+      "companyName": _companyNameController.text,
       "description": _productDescriptionController.text,
       "userId": userId,
       "companyId": companyId,
@@ -135,6 +142,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 onChanged: (value) => setState(() => errorPrice = value.isEmpty),
               ),
               customTextField(
+                _companyNameController,
+                'Company Name',
+                onChanged:
+                    (value) => setState(() => errorCompany = value.isEmpty),
+              ),
+              customTextField(
                 _productQuantityController,
                 'Quantity',
                 errorText: errorQuantity ? 'Please enter a quantity' : null,
@@ -147,7 +160,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 onChanged: (value) => setState(() => errorDescription = value.isEmpty),
               ),
               const SizedBox(height: 20),
-              Container(
+              SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _handleSubmit,

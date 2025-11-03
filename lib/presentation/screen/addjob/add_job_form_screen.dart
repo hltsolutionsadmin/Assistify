@@ -23,8 +23,7 @@ class AddJobFormScreen extends StatefulWidget {
   final String? companyName;
     final String? companyPhone;
 
-  const AddJobFormScreen({Key? key, this.jobData, this.title, this.companyName, this.companyPhone})
-    : super(key: key);
+  const AddJobFormScreen({super.key, this.jobData, this.title, this.companyName, this.companyPhone});
 
   @override
   State<AddJobFormScreen> createState() => _AddJobFormScreenState();
@@ -187,7 +186,7 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
                         options
                             .map(
                               (option) => RadioListTile<String>(
-                                fillColor: MaterialStateProperty.all(
+                                fillColor: WidgetStateProperty.all(
                                   AppColor.blue,
                                 ),
                                 title: Text(option),
@@ -257,7 +256,7 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
                         _selectProducts
                             .map(
                               (product) => RadioListTile<String>(
-                                fillColor: MaterialStateProperty.all(
+                                fillColor: WidgetStateProperty.all(
                                   AppColor.blue,
                                 ),
                                 title: Text(product.productName ?? ''),
@@ -827,7 +826,7 @@ class _AddJobFormScreenState extends State<AddJobFormScreen> {
                                           ? spareBox['id']
                                           : null,
                                   "billId": null,
-                                  "productId": spareBox['productId'] ?? null,
+                                  "productId": spareBox['productId'],
                                   "product":
                                       spareBox['selectedProduct'] ==
                                               'Others Items'

@@ -19,14 +19,14 @@ class PrintScreen extends StatefulWidget {
   final String? companyPhone;
 
   const PrintScreen({
-    Key? key,
+    super.key,
     this.data,
     this.companyName,
     this.category,
     this.spares,
     this.logo,
     this.companyPhone
-  }) : super(key: key);
+  });
 
   @override
   State<PrintScreen> createState() => _PrintScreenState();
@@ -130,8 +130,8 @@ class _PrintScreenState extends State<PrintScreen> {
   }
 
   String fixedLabel(String label, int width) {
-    if (label.length >= width) return label.substring(0, width) + ': ';
-    return label.padRight(width) + ': ';
+    if (label.length >= width) return '${label.substring(0, width)}: ';
+    return '${label.padRight(width)}: ';
   }
 
   String fixedLabelValue(
@@ -216,12 +216,11 @@ class _PrintScreenState extends State<PrintScreen> {
 
       if (isCategory2) {
         receiptText +=
-            fixedLabelValue('Name', data.customerName ?? '', 7, colItem) + '\n';
+            '${fixedLabelValue('Name', data.customerName ?? '', 7, colItem)}\n';
         receiptText +=
-            fixedLabelValue('Phone', data.phoneNumber ?? '', 7, colItem) + '\n';
+            '${fixedLabelValue('Phone', data.phoneNumber ?? '', 7, colItem)}\n';
         receiptText +=
-            fixedLabelValue('Address', data.address ?? '', 7, colItem + 10) +
-            '\n';
+            '${fixedLabelValue('Address', data.address ?? '', 7, colItem + 10)}\n';
       } else {
         receiptText +=
             '${fixedLabel('Product', labelWidth)}${data.productName ?? ''}\n';
@@ -233,17 +232,11 @@ class _PrintScreenState extends State<PrintScreen> {
 
       if (isCategory2 && widget.spares != null) {
         receiptText +=
-            padRight('Item', colItem) +
-            padLeft('Qty', colQty) +
-            padLeft('Price', colPrice) +
-            '\n';
+            '${padRight('Item', colItem)}${padLeft('Qty', colQty)}${padLeft('Price', colPrice)}\n';
         receiptText += '-' * (isWidePrinter ? 40 : 32) + '\n';
         for (var spare in widget.spares!) {
           receiptText +=
-              padRight(spare.product ?? '', colItem) +
-              padLeft('${spare.quantity}', colQty) +
-              padLeft('${spare.price}', colPrice) +
-              '\n';
+              '${padRight(spare.product ?? '', colItem)}${padLeft('${spare.quantity}', colQty)}${padLeft('${spare.price}', colPrice)}\n';
         }
 
         receiptText += '-' * (isWidePrinter ? 40 : 32) + '\n';

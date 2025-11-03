@@ -39,7 +39,7 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
     try {
       emit(ForgotPasswordLoading());
       final forgotPasswordEntity = await useCase(email);
-      print('login status::${forgotPasswordEntity}');
+      print('login status::$forgotPasswordEntity');
       emit(ForgotPasswordLoaded(forgotPasswordEntity));
       if (forgotPasswordEntity.status == 'SUCCESS') {
          

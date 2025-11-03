@@ -8,8 +8,7 @@ class AddFormScreen extends StatefulWidget {
 final dynamic jobData;
   String? companyName;
   String? companyPhone;
-  AddFormScreen({Key? key, this.companyName, this.category, this.jobData, this.companyPhone})
-    : super(key: key);
+  AddFormScreen({super.key, this.companyName, this.category, this.jobData, this.companyPhone});
   @override
   _AddFormScreenState createState() => _AddFormScreenState();
 }

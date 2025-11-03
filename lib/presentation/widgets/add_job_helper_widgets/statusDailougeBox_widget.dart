@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
           title: Text('Select Status'),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Container(
+              return SizedBox(
                 width: double.maxFinite,
                 child: ListView(
                   shrinkWrap: true,
@@ -43,8 +43,8 @@ import 'package:flutter/material.dart';
               },
             ),
             TextButton(
-              child: Text('OK'),
               onPressed: onPressed,
+              child: Text('OK'),
             ),
           ],
         );

@@ -46,7 +46,7 @@ class LoginCubit extends Cubit<LoginState> {
     try {
       emit(LogInLoading());
       final otpEntity = await useCase(email, password);
-      print('login status::${otpEntity}');
+      print('login status::$otpEntity');
       emit(LogInLoaded(otpEntity));
       if (otpEntity.status == 'SUCCESS') {
         SharedPreferences prefs = await SharedPreferences.getInstance();
