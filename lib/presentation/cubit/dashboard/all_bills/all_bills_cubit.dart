@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:assistify/core/constants/custome_snack_bar.dart';
 import 'package:assistify/data/model/dash_board/all_bills_model.dart';
@@ -18,7 +17,6 @@ class AllBillsCubit extends Cubit<AllBillsState> {
 
 List<Bills>? _allBills = [];
     
-bool _isFilterApplied = false;
   Future<void> all_bills(BuildContext context, dynamic body, {bool isFilter = false}) async {
   bool isConnected = await networkService.hasInternetConnection();
   if (!isConnected) {
@@ -33,7 +31,6 @@ bool _isFilterApplied = false;
   try {
     if (body["pageNumber"] == "1") {
       _allBills = [];
-      _isFilterApplied = isFilter;
       emit(AllBillsLoading());
     }
 

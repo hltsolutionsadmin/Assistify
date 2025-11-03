@@ -4,6 +4,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
 class ReportsScreen extends StatefulWidget {
+  const ReportsScreen({super.key});
+
   @override
   _ReportsViewState createState() => _ReportsViewState();
 }

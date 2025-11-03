@@ -1,6 +1,5 @@
 import 'package:assistify/core/constants/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class BuildSearchField extends StatelessWidget {
   final BuildContext context;

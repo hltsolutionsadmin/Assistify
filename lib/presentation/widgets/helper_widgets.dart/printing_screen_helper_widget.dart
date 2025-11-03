@@ -1,5 +1,4 @@
 import 'package:assistify/core/constants/colors.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 Widget buildInfoRow(String label, String value) {

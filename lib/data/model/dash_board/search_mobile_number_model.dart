@@ -11,15 +11,15 @@ class SeachMobileNumberModel {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(Data.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -47,11 +47,11 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['customerName'] = this.customerName;
-    data['address'] = this.address;
-    data['phoneNumber'] = this.phoneNumber;
-    data['alternatePhoneNumber'] = this.alternatePhoneNumber;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['customerName'] = customerName;
+    data['address'] = address;
+    data['phoneNumber'] = phoneNumber;
+    data['alternatePhoneNumber'] = alternatePhoneNumber;
     return data;
   }
 }

@@ -8,13 +8,13 @@ class UserProfileModel {
   UserProfileModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -31,7 +31,7 @@ class Data {
   String? logo;
   String? bannerImage;
   num? initialJOBID;
-  Null? registeredIdentity;
+  Null registeredIdentity;
   String? termsAndConditions;
   num? category;
   String? jobIdFormat;
@@ -39,8 +39,8 @@ class Data {
   String? createdAt;
   num? categoryId;
   String? updatedAt;
-  Null? products;
-  Null? bills;
+  Null products;
+  Null bills;
 
   Data(
       {this.id,
@@ -84,25 +84,25 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['address'] = this.address;
-    data['phoneNumber'] = this.phoneNumber;
-    data['email'] = this.email;
-    data['logo'] = this.logo;
-    data['bannerImage'] = this.bannerImage;
-    data['initialJOBID'] = this.initialJOBID;
-    data['registeredIdentity'] = this.registeredIdentity;
-    data['termsAndConditions'] = this.termsAndConditions;
-    data['category'] = this.category;
-    data['jobIdFormat'] = this.jobIdFormat;
-    data['validityDate'] = this.validityDate;
-    data['createdAt'] = this.createdAt;
-    data['categoryId'] = this.categoryId;
-    data['updatedAt'] = this.updatedAt;
-    data['products'] = this.products;
-    data['bills'] = this.bills;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['address'] = address;
+    data['phoneNumber'] = phoneNumber;
+    data['email'] = email;
+    data['logo'] = logo;
+    data['bannerImage'] = bannerImage;
+    data['initialJOBID'] = initialJOBID;
+    data['registeredIdentity'] = registeredIdentity;
+    data['termsAndConditions'] = termsAndConditions;
+    data['category'] = category;
+    data['jobIdFormat'] = jobIdFormat;
+    data['validityDate'] = validityDate;
+    data['createdAt'] = createdAt;
+    data['categoryId'] = categoryId;
+    data['updatedAt'] = updatedAt;
+    data['products'] = products;
+    data['bills'] = bills;
     return data;
   }
 }

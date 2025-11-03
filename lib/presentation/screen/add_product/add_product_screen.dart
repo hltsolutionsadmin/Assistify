@@ -147,7 +147,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 onChanged: (value) => setState(() => errorDescription = value.isEmpty),
               ),
               const SizedBox(height: 20),
-              Container(
+              SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _handleSubmit,

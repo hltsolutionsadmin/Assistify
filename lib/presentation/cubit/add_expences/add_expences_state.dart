@@ -1,8 +1,6 @@
 import 'package:assistify/data/model/add_expences/add_expence_model.dart';
 import 'package:assistify/data/model/add_expences/delete_expence_model.dart';
 import 'package:assistify/data/model/add_expences/edit_expence_model.dart';
-import 'package:assistify/data/model/add_product/add_product_model.dart';
-import 'package:assistify/data/model/add_product/edit_product_model.dart';
 
 abstract class AddExpencesState {}
 

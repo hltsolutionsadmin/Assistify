@@ -11,15 +11,15 @@ class BillSparesModel {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(Data.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -56,14 +56,14 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['billId'] = this.billId;
-    data['productId'] = this.productId;
-    data['product'] = this.product;
-    data['quantity'] = this.quantity;
-    data['price'] = this.price;
-    data['description'] = this.description;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['billId'] = billId;
+    data['productId'] = productId;
+    data['product'] = product;
+    data['quantity'] = quantity;
+    data['price'] = price;
+    data['description'] = description;
     return data;
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void showContactPopup(BuildContext context, String phoneNumber, dynamic data) {
-  void _makePhoneCall(String phoneNumber) async {
+  void makePhoneCall(String phoneNumber) async {
     print("Phone Number: $phoneNumber");
     final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
     try {
@@ -17,7 +17,7 @@ void showContactPopup(BuildContext context, String phoneNumber, dynamic data) {
     }
   }
 
-  Future<void> _launchWhatsApp(String phone) async {
+  Future<void> launchWhatsApp(String phone) async {
     String sanitizedPhone = phone.replaceAll(RegExp(r'[^0-9+]'), '');
     if (sanitizedPhone.startsWith('+')) {
       sanitizedPhone = sanitizedPhone.substring(1);
@@ -53,7 +53,7 @@ void showContactPopup(BuildContext context, String phoneNumber, dynamic data) {
             children: [
               InkWell(
                 onTap: () async {
-                  _makePhoneCall(phoneNumber);
+                  makePhoneCall(phoneNumber);
                   Navigator.pop(context);
                 },
                 child: Row(
@@ -67,7 +67,7 @@ void showContactPopup(BuildContext context, String phoneNumber, dynamic data) {
               SizedBox(height: 20),
               InkWell(
                 onTap: () async {
-                  _launchWhatsApp(phoneNumber);
+                  launchWhatsApp(phoneNumber);
                   Navigator.pop(context);
                 },
                 child: Row(

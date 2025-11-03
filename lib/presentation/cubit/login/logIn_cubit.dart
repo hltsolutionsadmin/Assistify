@@ -2,6 +2,7 @@ import 'package:assistify/core/constants/custome_snack_bar.dart';
 import 'package:assistify/domain/usecase/login/login_usecase.dart';
 import 'package:assistify/presentation/cubit/login/logIn_state.dart';
 import 'package:assistify/presentation/screen/dashboard/dash_board_screen.dart';
+import 'package:assistify/presentation/screen/dashboard/dash_board_screen1.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,7 +47,7 @@ class LoginCubit extends Cubit<LoginState> {
     try {
       emit(LogInLoading());
       final otpEntity = await useCase(email, password);
-      print('login status::${otpEntity}');
+      print('login status::$otpEntity');
       emit(LogInLoaded(otpEntity));
       if (otpEntity.status == 'SUCCESS') {
         SharedPreferences prefs = await SharedPreferences.getInstance();

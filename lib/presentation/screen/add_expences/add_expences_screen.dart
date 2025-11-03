@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AddExpenseScreen extends StatefulWidget {
   String? title;
   dynamic data;
-  AddExpenseScreen({Key? key, this.title, this.data}) : super(key: key);
+  AddExpenseScreen({super.key, this.title, this.data});
   @override
   _AddExpenseViewState createState() => _AddExpenseViewState();
 }
@@ -68,14 +68,14 @@ class _AddExpenseViewState extends State<AddExpenseScreen> {
           title: Text('Select Category'),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Container(
+              return SizedBox(
                 width: double.maxFinite,
                 child: ListView(
                   shrinkWrap: true,
                   children: ['Food', 'Transport', 'Shopping', 'Office Supplies']
                       .map((category) {
                     return RadioListTile<String>(
-                      fillColor: MaterialStateProperty.all(AppColor.blue),
+                      fillColor: WidgetStateProperty.all(AppColor.blue),
                       title: Text(category),
                       value: category,
                       groupValue: tempSelectedCategory,
@@ -125,7 +125,7 @@ class _AddExpenseViewState extends State<AddExpenseScreen> {
           title: Text('Select Payment Mode'),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Container(
+              return SizedBox(
                 width: double.maxFinite,
                 child: ListView(
                   shrinkWrap: true,

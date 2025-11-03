@@ -10,6 +10,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InventoryScreen extends StatefulWidget {
+  const InventoryScreen({super.key});
+
   @override
   State<InventoryScreen> createState() => _InventoryScreenState();
 }
@@ -18,6 +20,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
   bool _isDeleting = false;
   List<Data>? _cachedProducts;
 
+  @override
   void initState() {
     super.initState();
     _fetchData();
@@ -131,7 +134,7 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onDeleteStart;
   final VoidCallback onDeleteComplete;
 
-  const ProductCard({
+  const ProductCard({super.key, 
     required this.product,
     required this.onDeleteStart,
     required this.onDeleteComplete,
@@ -301,7 +304,7 @@ class ProductCard extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                     children: [
                       TextSpan(
-                        text: '\₹ ${product.price}',
+                        text: '₹ ${product.price}',
                         style: TextStyle(fontWeight: FontWeight.normal),
                       ),
                     ],

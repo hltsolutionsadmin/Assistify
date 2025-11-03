@@ -28,13 +28,13 @@ class AddItemsScreen extends StatefulWidget {
   String? companyPhone;
 
   AddItemsScreen({
-    Key? key,
+    super.key,
     this.jobData,
     this.title,
     this.companyName,
     this.category,
     this.companyPhone
-  }) : super(key: key);
+  });
 
   @override
   _AddJobFormScreenState createState() => _AddJobFormScreenState();
@@ -212,7 +212,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                         _selectProducts
                             .map(
                               (product) => RadioListTile<String>(
-                                fillColor: MaterialStateProperty.all(
+                                fillColor: WidgetStateProperty.all(
                                   AppColor.blue,
                                 ),
                                 title: Text(product.productName ?? ''),
@@ -668,7 +668,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                             _phoneLengthError =
                                 _phoneNumberController.text.length < 10;
                             _addressError = _addressController.text.isEmpty;
-                            _sparesError = _spareBoxes.length == 0;
+                            _sparesError = _spareBoxes.isEmpty;
                           });
                           try {
                             if (_nameError ||

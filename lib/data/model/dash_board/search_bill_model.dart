@@ -8,13 +8,13 @@ class SearchBillModel {
   SearchBillModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -32,18 +32,18 @@ class Data {
     if (json['bills'] != null) {
       bills = <Bills>[];
       json['bills'].forEach((v) {
-        bills!.add(new Bills.fromJson(v));
+        bills!.add(Bills.fromJson(v));
       });
     }
     totalRecords = json['totalRecords'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.bills != null) {
-      data['bills'] = this.bills!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (bills != null) {
+      data['bills'] = bills!.map((v) => v.toJson()).toList();
     }
-    data['totalRecords'] = this.totalRecords;
+    data['totalRecords'] = totalRecords;
     return data;
   }
 }
@@ -66,12 +66,12 @@ class Bills {
   num? totalAmount;
   String? createdAt;
   String? updatedAt;
-  Null? deliveryDate;
+  Null deliveryDate;
   String? statusDescription;
   String? paymentType;
   String? userId;
   String? companyId;
-  Null? billSpares;
+  Null billSpares;
 
   Bills(
       {this.id,
@@ -125,30 +125,30 @@ class Bills {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['jobId'] = this.jobId;
-    data['customerName'] = this.customerName;
-    data['address'] = this.address;
-    data['phoneNumber'] = this.phoneNumber;
-    data['alternatePhoneNumber'] = this.alternatePhoneNumber;
-    data['productName'] = this.productName;
-    data['modelNumber'] = this.modelNumber;
-    data['serialNumber'] = this.serialNumber;
-    data['complaint'] = this.complaint;
-    data['otherAccessories'] = this.otherAccessories;
-    data['status'] = this.status;
-    data['paidAmount'] = this.paidAmount;
-    data['balance'] = this.balance;
-    data['totalAmount'] = this.totalAmount;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['deliveryDate'] = this.deliveryDate;
-    data['statusDescription'] = this.statusDescription;
-    data['paymentType'] = this.paymentType;
-    data['userId'] = this.userId;
-    data['companyId'] = this.companyId;
-    data['billSpares'] = this.billSpares;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['jobId'] = jobId;
+    data['customerName'] = customerName;
+    data['address'] = address;
+    data['phoneNumber'] = phoneNumber;
+    data['alternatePhoneNumber'] = alternatePhoneNumber;
+    data['productName'] = productName;
+    data['modelNumber'] = modelNumber;
+    data['serialNumber'] = serialNumber;
+    data['complaint'] = complaint;
+    data['otherAccessories'] = otherAccessories;
+    data['status'] = status;
+    data['paidAmount'] = paidAmount;
+    data['balance'] = balance;
+    data['totalAmount'] = totalAmount;
+    data['createdAt'] = createdAt;
+    data['updatedAt'] = updatedAt;
+    data['deliveryDate'] = deliveryDate;
+    data['statusDescription'] = statusDescription;
+    data['paymentType'] = paymentType;
+    data['userId'] = userId;
+    data['companyId'] = companyId;
+    data['billSpares'] = billSpares;
     return data;
   }
 }
