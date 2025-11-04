@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:assistify/core/constants/colors.dart';
 import 'package:assistify/core/constants/imgs_const.dart';
 import 'package:assistify/presentation/widgets/date_converter_widget.dart';

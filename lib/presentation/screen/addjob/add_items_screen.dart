@@ -33,7 +33,7 @@ class AddItemsScreen extends StatefulWidget {
     this.title,
     this.companyName,
     this.category,
-    this.companyPhone
+    this.companyPhone,
   });
 
   @override
@@ -154,9 +154,9 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
   Future<void> _fetchData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-       _userId = prefs.getString('userId') ?? '';
-    _companyId = prefs.getString('companyId') ?? '';
-    context.read<AddProductsCubit>().getProduct(context, _companyId!);
+      _userId = prefs.getString('userId') ?? '';
+      _companyId = prefs.getString('companyId') ?? '';
+      context.read<AddProductsCubit>().getProduct(context, _companyId!);
     });
   }
 
@@ -198,86 +198,82 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
       builder: (context) {
         String? tempProductSelectedName = _spareBoxes[index]['selectedProduct'];
         Data? selectedProductObject;
-        selectedProduct = _spareBoxes[index]['selectedProduct'];
+
         return AlertDialog(
           backgroundColor: AppColor.white,
           title: const Text('Select Item'),
           content: StatefulBuilder(
-            builder:
-                (context, setState) => SizedBox(
-                  width: double.maxFinite,
-                  child: ListView(
-                    shrinkWrap: true,
-                    children:
-                        _selectProducts
-                            .map(
-                              (product) => RadioListTile<String>(
-                                fillColor: WidgetStateProperty.all(
-                                  AppColor.blue,
-                                ),
-                                title: Text(product.productName ?? ''),
-                                value: product.productName ?? '',
-                                groupValue: tempProductSelectedName,
-                                onChanged: (value) {
-                                  setState(() {
-                                    tempProductSelectedName = value;
-                                    selectedProductObject = _selectProducts
-                                        .firstWhere(
-                                          (p) => p.productName == value,
-                                          orElse: () => Data(),
-                                        );
-                                  });
-                                },
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                  ),
+            builder: (context, setStateDialog) {
+              return SizedBox(
+                width: double.maxFinite,
+                child: ListView(
+                  shrinkWrap: true,
+                  children:
+                      _selectProducts.map((product) {
+                        return RadioListTile<String>(
+                          fillColor: WidgetStateProperty.all(AppColor.blue),
+                          title: Text(product.productName ?? ''),
+                          value: product.productName ?? '',
+                          groupValue: tempProductSelectedName,
+                          onChanged: (value) {
+                            setStateDialog(() {
+                              tempProductSelectedName = value;
+                              selectedProductObject = _selectProducts
+                                  .firstWhere(
+                                    (p) => p.productName == value,
+                                    orElse: () => Data(),
+                                  );
+                            });
+
+                            // ✅ Instantly update spare box and close dialog
+                            setState(() {
+                              _spareBoxes[index]['selectedProduct'] =
+                                  tempProductSelectedName;
+                              _spareBoxes[index]['showOtherItemsFields'] =
+                                  tempProductSelectedName == 'Others Items';
+
+                              if (selectedProductObject != null) {
+                                _spareBoxes[index]['quantity'] =
+                                    selectedProductObject!.quantity ?? 0;
+                                _spareBoxes[index]['price'] =
+                                    selectedProductObject!.price ?? 0.0;
+                                _spareBoxes[index]['maxQuantity'] =
+                                    selectedProductObject!.quantity ?? 0;
+                                _spareBoxes[index]['name'] =
+                                    selectedProductObject!.productName;
+                                _spareBoxes[index]['productId'] =
+                                    selectedProductObject!.id;
+                              } else {
+                                _spareBoxes[index]['quantity'] = 0;
+                                _spareBoxes[index]['price'] = 0.0;
+                                _spareBoxes[index]['maxQuantity'] = 100;
+                                _spareBoxes[index]['name'] =
+                                    tempProductSelectedName;
+                                _spareBoxes[index]['productId'] = '';
+                              }
+
+                              _spareBoxes[index]['total'] =
+                                  (_spareBoxes[index]['quantity'] ?? 0) *
+                                  (_spareBoxes[index]['price'] ?? 0.0);
+                              _updateBalanceAmount();
+                              _validateItems();
+                            });
+
+                            Navigator.of(context).pop(); // ✅ Close instantly
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        );
+                      }).toList(),
                 ),
+              );
+            },
           ),
           actions: [
             TextButton(
               child: Text('Cancel', style: TextStyle(color: AppColor.black)),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text('OK', style: TextStyle(color: AppColor.blue)),
               onPressed: () {
-                setState(() {
-                  _spareBoxes[index]['selectedProduct'] =
-                      tempProductSelectedName;
-                  _spareBoxes[index]['showOtherItemsFields'] =
-                      tempProductSelectedName == 'Others Items';
-
-                  if (selectedProductObject != null) {
-                    _spareBoxes[index]['quantity'] =
-                        selectedProductObject!.quantity ?? 0;
-                    _spareBoxes[index]['price'] =
-                        selectedProductObject!.price ?? 0.0;
-                    _spareBoxes[index]['maxQuantity'] =
-                        selectedProductObject!.quantity ?? 0;
-                    _spareBoxes[index]['name'] =
-                        selectedProductObject!.productName;
-                    _spareBoxes[index]['productId'] = selectedProductObject!.id;
-                  } else {
-                    _spareBoxes[index]['quantity'] = 0;
-                    _spareBoxes[index]['price'] = 0.0;
-                    _spareBoxes[index]['maxQuantity'] = 100;
-                    _spareBoxes[index]['name'] = tempProductSelectedName;
-                    _spareBoxes[index]['productId'] = '';
-                  }
-                  _spareBoxes[index]['total'] =
-                      (_spareBoxes[index]['quantity'] ?? 0) *
-                      (_spareBoxes[index]['price'] ?? 0.0);
-                  _updateBalanceAmount();
-
-                  _validateItems();
-                  print(
-                    'DEBUG: After OK in dialog, _spareBoxes[$index]: ${_spareBoxes[index]}',
-                  );
-                });
                 Navigator.of(context).pop();
               },
             ),
@@ -579,15 +575,16 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                               _validateItems();
                             });
                           },
-                          onSelectProductTap: () {
+                          onSelectProductTap: () async {
                             _showSelectProductDialogForSpareBox(index);
+                            return null;
                           },
                           maxQuantity:
                               currentSpareBoxData['maxQuantity'] ?? 1000,
                         );
                       }),
                     Text(
-                      'Total Amount: ₹${_spareBoxes.fold<double>(0, (sum, box) => sum + ((box['quantity'] ?? 0) * (box['price'] ?? 0.0))).toStringAsFixed(2)}',
+                      'Total Amount:  ₹${_spareBoxes.fold<double>(0, (sum, box) => sum + ((box['quantity'] ?? 0) * (box['price'] ?? 0.0))).toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -746,7 +743,6 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                               widget.companyName.toString(),
                               widget.companyPhone.toString(),
                               widget.category,
-
                             );
                           } finally {
                             if (mounted) {

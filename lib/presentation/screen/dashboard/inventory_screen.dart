@@ -169,6 +169,7 @@ class ProductCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      
                       if (product.description != null)
                         Text(
                           product.description!,
