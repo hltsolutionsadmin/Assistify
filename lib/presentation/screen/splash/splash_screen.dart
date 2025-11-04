@@ -31,19 +31,24 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkSession(BuildContext context) async {
     await Future.delayed(const Duration(seconds: 3));
-       SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('TOKEN') ?? '';
     print('token:$token');
+    if (!mounted) return;
     if(token.isEmpty){
-  Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-    } else {
+      if (mounted) {
         Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => DashBoardScreen()),
-      );
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      }
+    } else {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashBoardScreen()),
+        );
+      }
     }
   
   }
@@ -80,5 +85,11 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
         );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

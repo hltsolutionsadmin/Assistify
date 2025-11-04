@@ -283,7 +283,6 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -585,7 +584,7 @@ class _AddJobFormScreenState extends State<AddItemsScreen> {
                         );
                       }),
                     Text(
-                      'Total Amount: ₹${_spareBoxes.fold<double>(0, (sum, box) => sum + ((box['quantity'] ?? 0) * (box['price'] ?? 0.0))).toStringAsFixed(2)}',
+                      'Total Amount:  ₹${_spareBoxes.fold<double>(0, (sum, box) => sum + ((box['quantity'] ?? 0) * (box['price'] ?? 0.0))).toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

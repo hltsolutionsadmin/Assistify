@@ -19,10 +19,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _productNameController = TextEditingController();
   final TextEditingController _productPriceController = TextEditingController();
-  final TextEditingController _companyNameController = TextEditingController();
-  final TextEditingController _productQuantityController = TextEditingController();
-  final TextEditingController _productDescriptionController = TextEditingController();
-  
+  final TextEditingController _companyPriceController = TextEditingController();
+  final TextEditingController _productQuantityController =
+      TextEditingController();
+  final TextEditingController _productDescriptionController =
+      TextEditingController();
+
   bool errorName = false;
   bool errorPrice = false;
   bool errorQuantity = false;
@@ -44,11 +46,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
     final prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId') ?? '';
     companyId = prefs.getString('companyId') ?? '';
-    
+
     if (isEditMode && widget.data != null) {
       _productNameController.text = widget.data.productName ?? '';
       _productPriceController.text = widget.data.price?.toString() ?? '';
-      _companyNameController.text = widget.data.companyName ?? '';
+      _companyPriceController.text = widget.data.companyName ?? '';
       _productQuantityController.text = widget.data.quantity?.toString() ?? '';
       _productDescriptionController.text = widget.data.description ?? '';
     }
@@ -59,7 +61,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     _productNameController.dispose();
     _productPriceController.dispose();
     _productQuantityController.dispose();
-    _companyNameController.dispose();
+    _companyPriceController.dispose();
     _productDescriptionController.dispose();
     super.dispose();
   }
@@ -69,7 +71,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       isLoading = true;
       errorName = _productNameController.text.isEmpty;
       errorPrice = _productPriceController.text.isEmpty;
-      errorCompany = _companyNameController.text.isEmpty;
+      errorCompany = _companyPriceController.text.isEmpty;
       errorQuantity = _productQuantityController.text.isEmpty;
     });
 
@@ -82,7 +84,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       "productName": _productNameController.text,
       "price": _productPriceController.text,
       "quantity": _productQuantityController.text,
-      "companyName": _companyNameController.text,
+      "companyName": _companyPriceController.text,
       "description": _productDescriptionController.text,
       "userId": userId,
       "companyId": companyId,
@@ -92,18 +94,26 @@ class _AddProductScreenState extends State<AddProductScreen> {
       "productName": _productNameController.text,
       "price": _productPriceController.text,
       "quantity": _productQuantityController.text,
-      "companyName": _companyNameController.text,
+      "companyName": _companyPriceController.text,
       "description": _productDescriptionController.text,
       "userId": userId,
       "companyId": companyId,
-      "id":widget.data?.id,
+      "id": widget.data?.id,
     };
 
     if (isEditMode) {
       productData["productId"] = widget.data.id;
-      context.read<AddProductsCubit>().edit_product(context, editProductData, companyId);
+      context.read<AddProductsCubit>().edit_product(
+        context,
+        editProductData,
+        companyId,
+      );
     } else {
-      context.read<AddProductsCubit>().add_products(context, productData, companyId);
+      context.read<AddProductsCubit>().add_products(
+        context,
+        productData,
+        companyId,
+      );
     }
   }
 
@@ -139,11 +149,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 _productPriceController,
                 'Product Price',
                 errorText: errorPrice ? 'Please enter a product price' : null,
-                onChanged: (value) => setState(() => errorPrice = value.isEmpty),
+                onChanged:
+                    (value) => setState(() => errorPrice = value.isEmpty),
               ),
               customTextField(
-                _companyNameController,
-                'Company Name',
+                _companyPriceController,
+                'Company Price',
                 onChanged:
                     (value) => setState(() => errorCompany = value.isEmpty),
               ),
@@ -151,13 +162,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 _productQuantityController,
                 'Quantity',
                 errorText: errorQuantity ? 'Please enter a quantity' : null,
-                onChanged: (value) => setState(() => errorQuantity = value.isEmpty),
+                onChanged:
+                    (value) => setState(() => errorQuantity = value.isEmpty),
               ),
               customTextField(
                 _productDescriptionController,
                 'Description',
                 // errorText: errorDescription ? 'Please enter a description' : null,
-                onChanged: (value) => setState(() => errorDescription = value.isEmpty),
+                onChanged:
+                    (value) => setState(() => errorDescription = value.isEmpty),
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -170,15 +183,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  child: isLoading 
-                    ? const CupertinoActivityIndicator(color: Colors.white)
-                    : Text(
-                        isEditMode ? 'Update Product' : 'Add Product',
-                        style: TextStyle(
-                          color: AppColor.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  child:
+                      isLoading
+                          ? const CupertinoActivityIndicator(
+                            color: Colors.white,
+                          )
+                          : Text(
+                            isEditMode ? 'Update Product' : 'Add Product',
+                            style: TextStyle(
+                              color: AppColor.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                 ),
               ),
             ],
