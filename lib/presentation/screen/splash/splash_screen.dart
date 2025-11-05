@@ -1,6 +1,6 @@
 import 'package:assistify/core/constants/colors.dart';
 import 'package:assistify/core/constants/imgs_const.dart';
-import 'package:assistify/presentation/screen/dashboard/dash_board_screen.dart';
+import 'package:assistify/presentation/screen/homescreen/home_screen.dart';
 import 'package:assistify/presentation/screen/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,7 +46,12 @@ class _SplashScreenState extends State<SplashScreen>
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DashBoardScreen()),
+          MaterialPageRoute(
+            builder:
+                (context) => HomeScreen(
+               
+                ),
+          ),
         );
       }
     }

@@ -5,7 +5,6 @@ import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile
 import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_state.dart';
 import 'package:assistify/presentation/screen/addjob/add_form.dart';
 import 'package:assistify/presentation/screen/addjob/add_job_form_screen.dart';
-import 'package:assistify/presentation/screen/dashboard/dashboard_functions_widget.dart';
 import 'package:assistify/presentation/screen/login/login_screen.dart';
 import 'package:assistify/presentation/widgets/dash_board_helper_widget.dart';
 import 'package:assistify/presentation/widgets/filter_option_view_widget.dart';
@@ -187,19 +186,6 @@ Future<void> _checkForUpdate() async {
       onWillPop: _onWillPop,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer:
-            _isDrawerDataLoaded
-                ? Drawer(
-                  backgroundColor: AppColor.white,
-                  child: Drawer_tab(
-                    context: context,
-                    categoryId: categoryId,
-                    companyName: companyName,
-                    fetchAllBills: _fetchAllBills,
-                    fetchUserProfile: _fetchUserProfile,
-                  ),
-                )
-                : null,
         appBar: AppBar(
           shadowColor: AppColor.white,
           elevation: 2,
@@ -216,10 +202,6 @@ Future<void> _checkForUpdate() async {
               }
               return Text('', style: TextStyle(color: AppColor.blue));
             },
-          ),
-          leading: IconButton(
-            icon: Icon(Icons.menu, size: 30, color: AppColor.blue),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           actions: [
             Padding(
