@@ -2,6 +2,7 @@ import 'package:assistify/core/constants/colors.dart';
 import 'package:assistify/core/constants/sizes.dart';
 import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_cubit.dart';
 import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_state.dart';
+import 'package:assistify/presentation/screen/dashboard/employee_list_screen.dart';
 import 'package:assistify/presentation/screen/dashboard/expences_screen.dart';
 import 'package:assistify/presentation/screen/dashboard/inventory_screen.dart';
 import 'package:assistify/presentation/screen/dashboard/profile_screen.dart';
@@ -73,14 +74,13 @@ Widget Drawer_tab({
                   Navigator.pop(context);
                   fetchAllBills();
                 }),
-                // if (categoryId != 2)
-                  _buildDrawerItem(Icons.inventory, 'Inventory', () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => InventoryScreen()),
-                    );
-                  }),
+                _buildDrawerItem(Icons.inventory, 'Inventory', () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => InventoryScreen()),
+                  );
+                }),
                 if (categoryId != 2)
                   _buildDrawerItem(Icons.wallet, 'Expenses', () {
                     Navigator.pop(context);
@@ -89,6 +89,19 @@ Widget Drawer_tab({
                       MaterialPageRoute(builder: (_) => ExpencesScreen()),
                     );
                   }),
+
+                // ✅ New Employees Tab
+                if (categoryId != 3)
+                  _buildDrawerItem(Icons.group, 'Employees', () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EmployeeListScreen(),
+                      ),
+                    );
+                  }),
+
                 _buildDrawerItem(Icons.settings, 'Settings', () {
                   Navigator.pop(context);
                   final state = context.read<UserProfileCubit>().state;
@@ -163,7 +176,7 @@ Widget App_Bar({
   isFilterApplied,
   setState,
   final void Function(bool)? onFilter,
- final void Function(bool)? onTapFilter,
+  final void Function(bool)? onTapFilter,
 }) {
   return AppBar(
     shadowColor: AppColor.white,
@@ -212,11 +225,9 @@ Widget App_Bar({
                         isRefresh = val;
                       },
                       onFilter: (val) {
-                        print(val);
                         isFilterApplied = val;
                         fetchAllBills();
                       },
-                      
                     ),
                   ),
             );

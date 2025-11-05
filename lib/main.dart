@@ -14,18 +14,21 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart'; // ✅ Added
+import 'dart:io';
 import 'core/injection.dart' as di;
 
 /// ✅ Request Bluetooth + Location permissions
 Future<void> requestPermissions() async {
-  if (await Permission.bluetoothScan.isDenied) {
-    await Permission.bluetoothScan.request();
-  }
-  if (await Permission.bluetoothConnect.isDenied) {
-    await Permission.bluetoothConnect.request();
-  }
-  if (await Permission.location.isDenied) {
-    await Permission.location.request();
+  if (Platform.isAndroid) {
+    if (await Permission.bluetoothScan.isDenied) {
+      await Permission.bluetoothScan.request();
+    }
+    if (await Permission.bluetoothConnect.isDenied) {
+      await Permission.bluetoothConnect.request();
+    }
+    if (await Permission.location.isDenied) {
+      await Permission.location.request();
+    }
   }
 }
 

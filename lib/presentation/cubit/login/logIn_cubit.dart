@@ -2,7 +2,7 @@ import 'package:assistify/core/constants/custome_snack_bar.dart';
 import 'package:assistify/domain/usecase/login/login_usecase.dart';
 import 'package:assistify/presentation/cubit/login/logIn_state.dart';
 import 'package:assistify/presentation/screen/dashboard/dash_board_screen.dart';
-import 'package:assistify/presentation/screen/dashboard/dash_board_screen1.dart';
+import 'package:assistify/presentation/screen/homescreen/home_screen.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,7 +59,7 @@ class LoginCubit extends Cubit<LoginState> {
         prefs.setString("lastName", otpEntity.data?.user?.lastName ?? '');
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => DashBoardScreen()),
+          MaterialPageRoute(builder: (context) => HomeScreen()),
           (route) => false,
         );
       } else {
