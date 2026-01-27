@@ -134,7 +134,8 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onDeleteStart;
   final VoidCallback onDeleteComplete;
 
-  const ProductCard({super.key, 
+  const ProductCard({
+    super.key, 
     required this.product,
     required this.onDeleteStart,
     required this.onDeleteComplete,
@@ -169,6 +170,7 @@ class ProductCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      
                       if (product.description != null)
                         Text(
                           product.description!,

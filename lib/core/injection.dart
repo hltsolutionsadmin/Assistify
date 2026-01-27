@@ -54,8 +54,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 final GetIt sl = GetIt.instance;
+bool _initialized = false;
 
 void init(){
+  if (_initialized) {
+    return;
+  }
   sl.registerLazySingleton<Dio>(() => Dio());
   sl.registerLazySingleton(() => const FlutterSecureStorage());
   sl.registerLazySingleton(() => NetworkService());
@@ -200,4 +204,5 @@ void init(){
     () => SearchPhoneNumberUsecase(repository: sl<SearchPhoneNumeberRepository>()),
   );
   sl.registerFactory(() => SearchPhoneNumberCubit(useCase: sl<SearchPhoneNumberUsecase>(), networkService: NetworkService()));
+  _initialized = true;
 }

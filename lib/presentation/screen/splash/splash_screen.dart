@@ -1,6 +1,6 @@
 import 'package:assistify/core/constants/colors.dart';
 import 'package:assistify/core/constants/imgs_const.dart';
-import 'package:assistify/presentation/screen/dashboard/dash_board_screen.dart';
+import 'package:assistify/presentation/screen/homescreen/home_screen.dart';
 import 'package:assistify/presentation/screen/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,19 +31,29 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkSession(BuildContext context) async {
     await Future.delayed(const Duration(seconds: 3));
-       SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('TOKEN') ?? '';
     print('token:$token');
+    if (!mounted) return;
     if(token.isEmpty){
-  Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-    } else {
+      if (mounted) {
         Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => DashBoardScreen()),
-      );
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      }
+    } else {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => HomeScreen(
+               
+                ),
+          ),
+        );
+      }
     }
   
   }
@@ -80,5 +90,11 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
         );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

@@ -5,7 +5,6 @@ import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile
 import 'package:assistify/presentation/cubit/dashboard/user_profile/user_profile_state.dart';
 import 'package:assistify/presentation/screen/addjob/add_form.dart';
 import 'package:assistify/presentation/screen/addjob/add_job_form_screen.dart';
-import 'package:assistify/presentation/screen/dashboard/dashboard_functions_widget.dart';
 import 'package:assistify/presentation/screen/login/login_screen.dart';
 import 'package:assistify/presentation/widgets/dash_board_helper_widget.dart';
 import 'package:assistify/presentation/widgets/filter_option_view_widget.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io';
 
 class DashBoardScreen extends StatefulWidget {
   const DashBoardScreen({super.key});
@@ -56,27 +56,31 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
 Future<void> _checkForUpdate() async {
     print('checking for update');
-    await InAppUpdate.checkForUpdate().then((info) {
-setState(() {
-  if(info.updateAvailability == UpdateAvailability.updateAvailable){
-    print('update available');
-    update();
-  }
-});
-    }).catchError((e) {
+    if (!Platform.isAndroid) {
+      return;
+    }
+    try {
+      final info = await InAppUpdate.checkForUpdate();
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        print('update available');
+        await update();
+      }
+    } catch (e) {
       print('error in update');
       print(e.toString());
-    });
+    }
       
     
   }
 
-  void update() async {
+  Future<void> update() async {
     print('Updating');
-    await InAppUpdate.startFlexibleUpdate();
-    InAppUpdate.completeFlexibleUpdate().then((_) {}).catchError((error) {
+    try {
+      await InAppUpdate.startFlexibleUpdate();
+      await InAppUpdate.completeFlexibleUpdate();
+    } catch (error) {
       print(error.toString());
-    });
+    }
   }
 
   Future<void> _initializeData() async {
@@ -102,8 +106,8 @@ setState(() {
   @override
   void dispose() {
     searchFocusNode.dispose();
-    _scrollController.dispose();
     _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -151,25 +155,28 @@ setState(() {
   Future<void> _fetchAllBills() async {
     _isFetchingMore = true;
     print('_isFilterApplied$_isFilterApplied');
-    if (_isFilterApplied == true) {
-      await context.read<AllBillsCubit>().all_bills(context, {
-        "userId": userId,
-        "companyId": companyId,
-        "pageNumber": _pageNumber.toString(),
-        "pageSize": _pageSize.toString(),
-      });
-    } else {
-      if (isRefresh) {
-        _pageNumber = 1;
+    try {
+      if (_isFilterApplied == true) {
+        await context.read<AllBillsCubit>().all_bills(context, {
+          "userId": userId,
+          "companyId": companyId,
+          "pageNumber": _pageNumber.toString(),
+          "pageSize": _pageSize.toString(),
+        });
+      } else {
+        if (isRefresh) {
+          _pageNumber = 1;
+        }
+        await context.read<AllBillsCubit>().all_bills(context, {
+          "userId": userId,
+          "companyId": companyId,
+          "pageNumber": _pageNumber.toString(),
+          "pageSize": _pageSize.toString(),
+        });
+        isRefresh = false;
       }
-      await context.read<AllBillsCubit>().all_bills(context, {
-        "userId": userId,
-        "companyId": companyId,
-        "pageNumber": _pageNumber.toString(),
-        "pageSize": _pageSize.toString(),
-      });
+    } finally {
       _isFetchingMore = false;
-      isRefresh = false;
     }
   }
 
@@ -179,19 +186,6 @@ setState(() {
       onWillPop: _onWillPop,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer:
-            _isDrawerDataLoaded
-                ? Drawer(
-                  backgroundColor: AppColor.white,
-                  child: Drawer_tab(
-                    context: context,
-                    categoryId: categoryId,
-                    companyName: companyName,
-                    fetchAllBills: _fetchAllBills,
-                    fetchUserProfile: _fetchUserProfile,
-                  ),
-                )
-                : null,
         appBar: AppBar(
           shadowColor: AppColor.white,
           elevation: 2,
@@ -208,10 +202,6 @@ setState(() {
               }
               return Text('', style: TextStyle(color: AppColor.blue));
             },
-          ),
-          leading: IconButton(
-            icon: Icon(Icons.menu, size: 30, color: AppColor.blue),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           actions: [
             Padding(
